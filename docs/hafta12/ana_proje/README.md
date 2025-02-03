@@ -1,196 +1,204 @@
-# Hafta 12 - Alışkanlık Takip Uygulaması: Premium Özellikler ve Ödeme Sistemi
+# Hafta 12 - Ana Proje: Mağaza Yayınlama
 
-Bu hafta, uygulamamıza premium özellikler ekleyecek ve ödeme sistemini entegre edeceğiz.
+Bu hafta, alışkanlık takip uygulamamızı mağazalarda yayınlamak için hazırlayacağız.
 
-## 📱 Bu Haftanın Yenilikleri
+## 🎯 Hedefler
 
-- Premium özellikler
-- Ödeme sistemi entegrasyonu
-- Abonelik yönetimi
-- Gelir analizi
-- Promosyon kodları
+1. Mağaza Hazırlığı
+   - App icon ve splash screen
+   - Ekran görüntüleri ve videolar
+   - Mağaza açıklamaları
+   - Gizlilik politikası
 
-## 🚀 Kurulum Adımları
+2. Release Hazırlığı
+   - Versiyon yönetimi
+   - ProGuard kuralları
+   - Signing ayarları
+   - Performance optimizasyonu
 
-1. Gerekli paketleri `pubspec.yaml` dosyasına ekleyin:
+3. ASO Stratejisi
+   - Anahtar kelime araştırması
+   - Rakip analizi
+   - Görsel optimizasyon
+   - Değerlendirme yönetimi
+
+## 💻 Adım Adım Geliştirme
+
+### 1. Mağaza Hazırlığı
+
+`pubspec.yaml`:
 ```yaml
+name: habit_tracker
+description: >
+  Alışkanlık Takip uygulaması ile günlük rutinlerinizi
+  kolayca planlayın, takip edin ve hedeflerinize ulaşın.
+  Motivasyonunuzu yüksek tutun, istatistiklerinizi görün
+  ve başarılarınızı kutlayın.
+version: 1.0.0+1
+
 dependencies:
-  in_app_purchase: ^3.1.11
-  revenue_cat: ^6.3.0
-  firebase_analytics: ^10.7.4
-  shared_preferences: ^2.2.0
-  flutter_stripe: ^10.0.0
+  flutter:
+    sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.13
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/splash/splash.png
+  branding: assets/splash/branding.png
+  android_12:
+    image: assets/splash/splash_android12.png
+    branding: assets/splash/branding_android12.png
 ```
 
-2. `lib` klasörü altında aşağıdaki dosyaları oluşturun:
-   - `screens/premium_ekrani.dart`
-   - `services/odeme_servisi.dart`
-   - `models/abonelik.dart`
-   - `utils/gelir_analizi.dart`
-   - `widgets/premium_ozellikler.dart`
+### 2. Android Release
 
-## 🔍 Kod İncelemesi
-
-### 1. Premium Özellikler
-```dart
-class PremiumOzellikler {
-  static const List<Map<String, dynamic>> ozellikler = [
-    {
-      'baslik': 'Sınırsız Alışkanlık',
-      'aciklama': 'İstediğiniz kadar alışkanlık ekleyin',
-      'ikon': Icons.infinite,
-    },
-    {
-      'baslik': 'Detaylı İstatistikler',
-      'aciklama': 'Gelişmiş analiz ve raporlar',
-      'ikon': Icons.analytics,
-    },
-    {
-      'baslik': 'Veri Yedekleme',
-      'aciklama': 'Otomatik bulut yedekleme',
-      'ikon': Icons.backup,
-    },
-    {
-      'baslik': 'Reklamsız Deneyim',
-      'aciklama': 'Rahatsız edici reklamlar yok',
-      'ikon': Icons.block,
-    },
-  ];
-}
+`android/key.properties`:
+```properties
+storePassword=*****
+keyPassword=*****
+keyAlias=upload
+storeFile=../upload-keystore.jks
 ```
 
-### 2. Ödeme Servisi
-```dart
-class OdemeServisi {
-  static final _revenueCat = RevenueCat.instance;
-  
-  static Future<void> initialize() async {
-    await _revenueCat.setup(
-      apiKey: 'your_api_key',
-      appUserId: await _getUserId(),
-    );
-  }
-
-  static Future<void> abonelikSatinAl(String paketId) async {
-    try {
-      final offering = await _revenueCat.getOfferings();
-      final package = offering.current?.getPackage(paketId);
-      
-      if (package != null) {
-        await _revenueCat.purchasePackage(package);
-        await _premiumOzellikleriniAktifEt();
-        await _analitikKaydet('premium_satin_alindi', {
-          'paket_id': paketId,
-        });
-      }
-    } catch (e) {
-      throw OdemeHatasi('Ödeme işlemi başarısız: $e');
+`android/app/build.gradle`:
+```gradle
+android {
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
     }
-  }
-
-  static Future<bool> premiumMu() async {
-    final info = await _revenueCat.getPurchaserInfo();
-    return info.entitlements.active.containsKey('premium');
-  }
-
-  static Future<void> _premiumOzellikleriniAktifEt() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('premium_aktif', true);
-  }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-rules.pro'
+        }
+    }
 }
 ```
 
-### 3. Abonelik Modeli
-```dart
-class Abonelik {
-  final String id;
-  final String baslik;
-  final String aciklama;
-  final double fiyat;
-  final String sure;
-  final List<String> ozellikler;
+### 3. iOS Release
 
-  const Abonelik({
-    required this.id,
-    required this.baslik,
-    required this.aciklama,
-    required this.fiyat,
-    required this.sure,
-    required this.ozellikler,
-  });
-
-  static List<Abonelik> paketler = [
-    Abonelik(
-      id: 'aylik',
-      baslik: 'Aylık Premium',
-      aciklama: 'Aylık premium üyelik',
-      fiyat: 29.99,
-      sure: 'ay',
-      ozellikler: [
-        'Sınırsız Alışkanlık',
-        'Detaylı İstatistikler',
-        'Veri Yedekleme',
-        'Reklamsız Deneyim',
-      ],
-    ),
-    Abonelik(
-      id: 'yillik',
-      baslik: 'Yıllık Premium',
-      aciklama: 'Yıllık premium üyelik (2 ay bedava)',
-      fiyat: 299.99,
-      sure: 'yıl',
-      ozellikler: [
-        'Sınırsız Alışkanlık',
-        'Detaylı İstatistikler',
-        'Veri Yedekleme',
-        'Reklamsız Deneyim',
-        'Öncelikli Destek',
-      ],
-    ),
-  ];
-}
+`ios/Runner.xcodeproj/project.pbxproj`:
+```xcconfig
+PRODUCT_BUNDLE_IDENTIFIER = com.example.habitTracker
+PRODUCT_NAME = Alışkanlık Takip
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 1
 ```
 
-## 🎯 Öğrenme Hedefleri
+### 4. Mağaza Metadataları
 
-Bu hafta:
-- In-app satın alma entegrasyonunu
-- RevenueCat kullanımını
-- Abonelik yönetimini
-- Gelir analizini
-öğrenmiş olacaksınız.
+`metadata/android/tr-TR/full_description.txt`:
+```text
+Alışkanlık Takip uygulaması ile hayatınızı düzene sokun!
 
-## 📝 Özelleştirme Önerileri
+✨ Özellikler:
+• Kolay alışkanlık oluşturma
+• Günlük, haftalık, aylık hedefler
+• Detaylı istatistikler
+• Hatırlatıcılar
+• Başarı rozetleri
+• Tema desteği
 
-1. Premium Özellikler:
-   - Özel temalar
-   - Gelişmiş istatistikler
-   - Grup alışkanlıkları
-   - Sosyal özellikler
+🎯 Neler Yapabilirsiniz:
+• Yeni alışkanlıklar edinebilir
+• Mevcut alışkanlıklarınızı takip edebilir
+• İlerlemenizi görebilir
+• Motivasyonunuzu artırabilir
+• Hedeflerinize ulaşabilirsiniz
 
-2. Ödeme Sistemi:
-   - Farklı ödeme yöntemleri
-   - Promosyon kodları
-   - Hediye abonelikler
-   - Aile planları
+📊 İstatistikler:
+• Günlük, haftalık, aylık grafikler
+• Başarı oranları
+• Streak takibi
+• Detaylı raporlar
 
-3. Gelir Analizi:
-   - Dönüşüm oranları
-   - Kullanıcı yaşam boyu değeri
-   - Churn analizi
-   - Gelir tahminleri
+⭐️ Neden Bizi Seçmelisiniz:
+• Kullanıcı dostu arayüz
+• Özelleştirilebilir temalar
+• Offline çalışma
+• Ücretsiz özellikler
+• Düzenli güncellemeler
 
-## 💡 Sonraki Hafta
+Hemen indirin ve alışkanlıklarınızı yönetmeye başlayın!
+```
 
-Gelecek hafta ekleyeceğimiz özellikler:
-- Performans optimizasyonu
-- Bellek yönetimi
-- Hata ayıklama sistemi
-- Çökme analizi
+`metadata/ios/tr-TR/keywords.txt`:
+```text
+alışkanlık,rutin,takip,planlayıcı,hedef,motivasyon,hatırlatıcı,takvim,istatistik,günlük
+```
 
-## 🔍 Önemli Notlar
+## 🎯 Ödevler
 
-- Ödeme güvenliğini sağlayın
-- Abonelik iptallerini düzgün yönetin
-- Gelir metriklerini takip edin
-- Kullanıcı geri bildirimlerini dikkate alın 
+1. Mağaza Hazırlığı:
+   - [ ] App icon tasarımı
+   - [ ] Screenshot'lar
+   - [ ] Feature grafikleri
+   - [ ] Tanıtım videosu
+
+2. Release Hazırlığı:
+   - [ ] ProGuard kuralları
+   - [ ] Signing ayarları
+   - [ ] Performance testleri
+   - [ ] Crash reporting
+
+3. ASO:
+   - [ ] Keyword araştırması
+   - [ ] Rakip analizi
+   - [ ] A/B test planı
+   - [ ] Review stratejisi
+
+## 🔍 Kontrol Listesi
+
+1. Android:
+   - [ ] App bundle hazır mı?
+   - [ ] Keystore güvende mi?
+   - [ ] Metadata tam mı?
+   - [ ] Store listing uygun mu?
+
+2. iOS:
+   - [ ] IPA hazır mı?
+   - [ ] Sertifikalar güncel mi?
+   - [ ] Screenshots uygun mu?
+   - [ ] App privacy tam mı?
+
+3. Genel:
+   - [ ] Versiyon doğru mu?
+   - [ ] Açıklamalar eksiksiz mi?
+   - [ ] Görseller optimize mi?
+   - [ ] Gizlilik politikası hazır mı?
+
+## 💡 İpuçları
+
+1. Mağaza Optimizasyonu:
+   - Görselleri optimize edin
+   - Açıklamaları zenginleştirin
+   - Anahtar kelimeleri araştırın
+   - Rakipleri analiz edin
+
+2. Release Yönetimi:
+   - Sürüm notları yazın
+   - Beta testleri yapın
+   - Feedback toplayın
+   - Hataları düzeltin
+
+## 📚 Faydalı Kaynaklar
+
+- [Flutter Release Guide](https://flutter.dev/docs/deployment/android)
+- [App Store Guidelines](https://developer.apple.com/app-store/guidelines/)
+- [Play Store Guidelines](https://play.google.com/about/developer-content-policy/)
+- [ASO Guide](https://developer.android.com/distribute/best-practices/launch) 

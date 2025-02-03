@@ -1,173 +1,292 @@
-# Hafta 13 - Alışkanlık Takip Uygulaması: Performans ve Hata Ayıklama
+# Hafta 13 - Ana Proje: Performans ve Güvenlik
 
-Bu hafta, uygulamamızın performansını optimize edecek ve hata ayıklama sistemini kuracağız.
+Bu hafta, alışkanlık takip uygulamamızın performansını optimize edecek ve güvenliğini artıracağız.
 
-## 📱 Bu Haftanın Yenilikleri
+## 🎯 Hedefler
 
-- Performans optimizasyonu
-- Bellek yönetimi
-- Hata ayıklama sistemi
-- Çökme analizi
-- Uygulama boyutu optimizasyonu
+1. Performans İyileştirmeleri
+   - Widget optimizasyonu
+   - Bellek yönetimi
+   - Render performansı
+   - State yönetimi
 
-## 🚀 Kurulum Adımları
+2. Güvenlik Önlemleri
+   - Veri şifreleme
+   - Güvenli depolama
+   - API güvenliği
+   - Kod karıştırma
 
-1. Gerekli paketleri `pubspec.yaml` dosyasına ekleyin:
-```yaml
-dependencies:
-  sentry_flutter: ^7.13.2
-  firebase_crashlytics: ^3.4.8
-  flutter_performance: ^1.0.0
-  memory_profiler: ^1.0.0
-  flutter_cache_manager: ^3.3.1
-```
+3. Hata Yönetimi
+   - Hata yakalama
+   - Çökme raporlama
+   - Uzaktan güncelleme
+   - Kullanıcı bildirimi
 
-2. `lib` klasörü altında aşağıdaki dosyaları oluşturun:
-   - `utils/performans_izleyici.dart`
-   - `utils/hata_raporlayici.dart`
-   - `services/onbellek_yoneticisi.dart`
-   - `utils/bellek_yoneticisi.dart`
-   - `config/performans_ayarlari.dart`
+## 💻 Adım Adım Geliştirme
 
-## 🔍 Kod İncelemesi
+### 1. Performans İyileştirmeleri
 
-### 1. Performans İzleyici
+`lib/widgets/habit_list.dart`:
 ```dart
-class PerformansIzleyici {
-  static final _sentry = SentryFlutter.instance;
-  static final _crashlytics = FirebaseCrashlytics.instance;
+class HabitList extends StatelessWidget {
+  final List<Habit> habits;
 
-  static Future<void> performansOlcumu(String islem, Function callback) async {
-    final baslangic = DateTime.now();
-    
-    try {
-      await callback();
-    } catch (e, stack) {
-      await hataKaydet(e, stack);
-    } finally {
-      final bitis = DateTime.now();
-      final sure = bitis.difference(baslangic);
-      
-      await _performansMetrigiKaydet(islem, sure);
-    }
+  const HabitList({
+    Key? key,
+    required this.habits,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      // Görünür öğeleri önbellekleme
+      cacheExtent: 100.0,
+      // Sabit yükseklik için
+      itemExtent: 80.0,
+      itemCount: habits.length,
+      itemBuilder: (context, index) {
+        return HabitTile(
+          // const constructor kullanımı
+          key: ValueKey(habits[index].id),
+          habit: habits[index],
+        );
+      },
+    );
   }
+}
 
-  static Future<void> _performansMetrigiKaydet(String islem, Duration sure) async {
-    await _sentry.addBreadcrumb(
-      Breadcrumb(
-        category: 'performans',
-        message: 'İşlem: $islem, Süre: ${sure.inMilliseconds}ms',
-        level: SentryLevel.info,
+class HabitTile extends StatelessWidget {
+  final Habit habit;
+
+  const HabitTile({
+    Key? key,
+    required this.habit,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      // Gereksiz rebuild'leri önleme
+      child: ListTile(
+        leading: CircleAvatar(
+          // Asset önbellekleme
+          child: CachedNetworkImage(
+            imageUrl: habit.iconUrl,
+            placeholder: (context, url) => CircularProgressIndicator(),
+          ),
+        ),
+        title: Text(habit.title),
+        subtitle: Text(habit.description),
+        trailing: HabitProgress(
+          // Ağır hesaplamaları önbellekleme
+          progress: habit.calculateProgress(),
+        ),
       ),
     );
   }
 }
 ```
 
-### 2. Bellek Yöneticisi
-```dart
-class BellekYoneticisi {
-  static const int _maksimumOnbellek = 100 * 1024 * 1024; // 100 MB
-  static final _onbellek = DefaultCacheManager();
+### 2. Güvenlik Önlemleri
 
-  static Future<void> onbellekTemizle() async {
-    final onbellekBoyutu = await _onbellekBoyutuAl();
-    
-    if (onbellekBoyutu > _maksimumOnbellek) {
-      await _onbellek.emptyCache();
-      debugPrint('Önbellek temizlendi: ${onbellekBoyutu ~/ 1024 / 1024} MB');
-    }
+`lib/services/security_service.dart`:
+```dart
+class SecurityService {
+  static final _secureStorage = FlutterSecureStorage();
+  static final _encrypter = Encrypter(AES(Key.fromSecureRandom(32)));
+
+  // Hassas veri şifreleme
+  static Future<String> encryptSensitiveData(String data) async {
+    final iv = IV.fromSecureRandom(16);
+    final encrypted = _encrypter.encrypt(data, iv: iv);
+    return '${encrypted.base64}:${iv.base64}';
   }
 
-  static Future<void> bellekOptimizasyonu() async {
-    await ImageCache().clear();
-    await _onbellek.emptyCache();
-    
-    // Gereksiz widget ağacı yeniden oluşturmalarını önle
-    WidgetsBinding.instance.deferFirstFrame();
-    await Future.delayed(Duration(milliseconds: 100));
-    WidgetsBinding.instance.allowFirstFrame();
+  // Güvenli depolama
+  static Future<void> secureStore(String key, String value) async {
+    final encrypted = await encryptSensitiveData(value);
+    await _secureStorage.write(key: key, value: encrypted);
   }
-}
-```
 
-### 3. Hata Raporlayıcı
-```dart
-class HataRaporlayici {
-  static Future<void> initialize() async {
-    await Sentry.init(
-      (options) {
-        options.dsn = 'your_sentry_dsn';
-        options.tracesSampleRate = 1.0;
-      },
-    );
+  // API güvenliği
+  static Future<Map<String, String>> getSecureHeaders() async {
+    final token = await _secureStorage.read(key: 'auth_token');
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final signature = generateSignature(token!, timestamp);
 
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
-    
-    FlutterError.onError = (FlutterErrorDetails details) {
-      FirebaseCrashlytics.instance.recordFlutterError(details);
-      Sentry.captureException(
-        details.exception,
-        stackTrace: details.stack,
-      );
+    return {
+      'Authorization': 'Bearer $token',
+      'X-Timestamp': timestamp,
+      'X-Signature': signature,
     };
   }
 
-  static Future<void> hataKaydet(dynamic hata, StackTrace? stackTrace) async {
-    await Sentry.captureException(
-      hata,
-      stackTrace: stackTrace,
-    );
-    
-    await FirebaseCrashlytics.instance.recordError(
-      hata,
-      stackTrace,
-      reason: 'Uygulama hatası',
-    );
+  // Güvenli hash oluşturma
+  static String generateSignature(String token, String timestamp) {
+    final key = utf8.encode(token);
+    final bytes = utf8.encode(timestamp);
+    final hmac = Hmac(sha256, key);
+    return hmac.convert(bytes).toString();
   }
 }
 ```
 
-## 🎯 Öğrenme Hedefleri
+### 3. Hata Yönetimi
 
-Bu hafta:
-- Performans optimizasyon tekniklerini
-- Bellek yönetimi stratejilerini
-- Hata izleme ve raporlamayı
-- Çökme analizini
-öğrenmiş olacaksınız.
+`lib/services/error_service.dart`:
+```dart
+class ErrorService {
+  static final _crashlytics = FirebaseCrashlytics.instance;
 
-## 📝 Özelleştirme Önerileri
+  // Hata izleme başlatma
+  static Future<void> initialize() async {
+    await _crashlytics.setCrashlyticsCollectionEnabled(true);
+    
+    FlutterError.onError = (details) {
+      _crashlytics.recordFlutterError(details);
+    };
+
+    Isolate.current.addErrorListener(RawReceivePort((pair) {
+      final List<dynamic> errorAndStacktrace = pair;
+      _crashlytics.recordError(
+        errorAndStacktrace.first,
+        errorAndStacktrace.last,
+      );
+    }).sendPort);
+  }
+
+  // Hata yakalama ve raporlama
+  static Future<T> handleError<T>(
+    Future<T> Function() operation,
+    String operationName,
+  ) async {
+    try {
+      return await operation();
+    } catch (e, stack) {
+      await _crashlytics.recordError(
+        e,
+        stack,
+        reason: 'Error in $operationName',
+      );
+      
+      await _showErrorDialog(e.toString());
+      rethrow;
+    }
+  }
+
+  // Kullanıcı bildirimi
+  static Future<void> _showErrorDialog(String message) async {
+    // Hata dialogu göster
+  }
+}
+```
+
+### 4. Profilleme ve İzleme
+
+`lib/services/performance_service.dart`:
+```dart
+class PerformanceService {
+  static final _performance = FirebasePerformance.instance;
+
+  // Operasyon ölçümü
+  static Future<T> measureOperation<T>({
+    required String name,
+    required Future<T> Function() operation,
+  }) async {
+    final trace = _performance.newTrace(name);
+    await trace.start();
+
+    try {
+      final result = await operation();
+      await trace.stop();
+      return result;
+    } catch (e) {
+      await trace.putAttribute('error', e.toString());
+      await trace.stop();
+      rethrow;
+    }
+  }
+
+  // Network izleme
+  static Future<Response> measureHttpRequest(
+    Future<Response> Function() request,
+    String url,
+  ) async {
+    final metric = _performance.newHttpMetric(url, HttpMethod.Get);
+    await metric.start();
+
+    try {
+      final response = await request();
+      metric.httpResponseCode = response.statusCode;
+      metric.responsePayloadSize = response.contentLength ?? 0;
+      await metric.stop();
+      return response;
+    } catch (e) {
+      await metric.putAttribute('error', e.toString());
+      await metric.stop();
+      rethrow;
+    }
+  }
+}
+```
+
+## 🎯 Ödevler
 
 1. Performans:
-   - Widget ağacı optimizasyonu
-   - Görsel önbelleğe alma
-   - Lazy loading
-   - İş parçacığı yönetimi
+   - [ ] ListView optimizasyonu
+   - [ ] Image önbellekleme
+   - [ ] State yönetimi iyileştirmesi
+   - [ ] Build metodu optimizasyonu
 
-2. Hata Ayıklama:
-   - Özel hata sayfaları
-   - Otomatik hata bildirimi
-   - Hata önleme stratejileri
-   - Debug modu araçları
+2. Güvenlik:
+   - [ ] Hassas veri şifreleme
+   - [ ] API güvenliği
+   - [ ] Güvenli depolama
+   - [ ] Kod karıştırma
 
-3. Bellek:
-   - Akıllı önbellek stratejisi
-   - Büyük veri optimizasyonu
-   - Kaynak temizleme
-   - Bellek sızıntısı tespiti
+3. Hata Yönetimi:
+   - [ ] Crashlytics entegrasyonu
+   - [ ] Hata yakalama sistemi
+   - [ ] Kullanıcı bildirimleri
+   - [ ] Uzaktan güncelleme
 
-## 💡 Sonraki Hafta
+## 🔍 Kontrol Listesi
 
-Gelecek hafta ekleyeceğimiz özellikler:
-- Uluslararasılaştırma (i18n)
-- Yerelleştirme (l10n)
-- RTL desteği
-- Çoklu dil desteği
+1. Performans:
+   - [ ] FPS 60'ın üzerinde mi?
+   - [ ] Bellek kullanımı normal mi?
+   - [ ] Jank yok mu?
+   - [ ] CPU kullanımı makul mü?
 
-## 🔍 Önemli Notlar
+2. Güvenlik:
+   - [ ] Hassas veriler şifreli mi?
+   - [ ] API çağrıları güvenli mi?
+   - [ ] Depolama güvenli mi?
+   - [ ] Kod karıştırma aktif mi?
 
-- Düzenli performans testleri yapın
-- Bellek kullanımını izleyin
-- Hata raporlarını analiz edin
-- Kullanıcı deneyimini koruyun 
+3. Hata Yönetimi:
+   - [ ] Hatalar yakalanıyor mu?
+   - [ ] Raporlar geliyor mu?
+   - [ ] Kullanıcı bildirimleri var mı?
+   - [ ] Güncellemeler çalışıyor mu?
+
+## 💡 İpuçları
+
+1. Performans:
+   - const constructor kullanın
+   - Gereksiz build'lerden kaçının
+   - Ağır işlemleri isolate'e alın
+   - Önbellekleme yapın
+
+2. Güvenlik:
+   - Şifreleme anahtarlarını gizleyin
+   - SSL pinning kullanın
+   - Güvenlik güncellemelerini takip edin
+   - Penetrasyon testi yapın
+
+## 📚 Faydalı Kaynaklar
+
+- [Flutter Performance Best Practices](https://flutter.dev/docs/perf/rendering/best-practices)
+- [Security Best Practices](https://flutter.dev/docs/security)
+- [Firebase Crashlytics](https://firebase.google.com/docs/crashlytics)
+- [Flutter DevTools](https://flutter.dev/docs/development/tools/devtools/performance) 

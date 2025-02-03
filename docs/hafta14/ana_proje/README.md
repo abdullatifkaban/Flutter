@@ -1,195 +1,313 @@
-# Hafta 14 - Alışkanlık Takip Uygulaması: Uluslararasılaştırma ve Yerelleştirme
+# Hafta 14 - Ana Proje: Çoklu Dil Desteği
 
-Bu hafta, uygulamamızı farklı dillere ve kültürlere uygun hale getireceğiz.
+Bu hafta, alışkanlık takip uygulamamıza çoklu dil desteği ve yerelleştirme özellikleri ekleyeceğiz.
 
-## 📱 Bu Haftanın Yenilikleri
+## 🎯 Hedefler
 
-- Çoklu dil desteği
-- RTL (Sağdan sola) desteği
-- Yerel tarih ve saat formatları
-- Kültürel uyarlamalar
-- Dil seçimi arayüzü
+1. Çoklu Dil Desteği
+   - ARB dosyaları
+   - Dil seçimi
+   - Otomatik dil algılama
+   - Dil değiştirme
 
-## 🚀 Kurulum Adımları
+2. Yerelleştirme
+   - Tarih formatları
+   - Sayı formatları
+   - Para birimi
+   - Ölçü birimleri
 
-1. Gerekli paketleri `pubspec.yaml` dosyasına ekleyin:
-```yaml
-dependencies:
-  flutter_localizations:
-    sdk: flutter
-  intl: ^0.18.1
-  easy_localization: ^3.0.3
-  flutter_localized_locales: ^2.0.5
+3. RTL Desteği
+   - Layout uyarlaması
+   - İkon ve görseller
+   - Metin yönü
+   - Scroll yönü
 
-flutter:
-  generate: true
-```
+4. Kültürel Uyarlama
+   - Temalar
+   - İçerik
+   - Görseller
+   - Bildirimler
 
-2. `lib` klasörü altında aşağıdaki dosyaları ve klasörleri oluşturun:
-   - `l10n/app_tr.arb`: Türkçe çeviriler
-   - `l10n/app_en.arb`: İngilizce çeviriler
-   - `l10n/app_ar.arb`: Arapça çeviriler
-   - `utils/dil_yoneticisi.dart`
-   - `config/yerellestime_ayarlari.dart`
+## 💻 Adım Adım Geliştirme
 
-## 🔍 Kod İncelemesi
+### 1. Çoklu Dil Desteği
 
-### 1. ARB Dosyaları
-```arb
-// app_tr.arb
+`lib/l10n/app_tr.arb`:
+```json
 {
-  "@@locale": "tr",
-  "appTitle": "Alışkanlık Takipçisi",
-  "welcomeMessage": "Hoş Geldiniz!",
-  "addHabit": "Alışkanlık Ekle",
-  "settings": "Ayarlar",
-  "statistics": "İstatistikler",
-  "profile": "Profil",
-  "language": "Dil",
-  "theme": "Tema",
-  "darkMode": "Karanlık Mod",
-  "notifications": "Bildirimler",
-  "about": "Hakkında",
-  "@addHabit": {
-    "description": "Ana sayfadaki alışkanlık ekleme butonu"
-  }
-}
+  "appTitle": "Alışkanlık Takip",
+  "@appTitle": {
+    "description": "Uygulama başlığı"
+  },
 
-// app_en.arb
-{
-  "@@locale": "en",
-  "appTitle": "Habit Tracker",
-  "welcomeMessage": "Welcome!",
-  "addHabit": "Add Habit",
-  "settings": "Settings",
-  "statistics": "Statistics",
-  "profile": "Profile",
-  "language": "Language",
-  "theme": "Theme",
-  "darkMode": "Dark Mode",
-  "notifications": "Notifications",
-  "about": "About"
-}
+  "habitCount": "{count} alışkanlık",
+  "@habitCount": {
+    "description": "Alışkanlık sayısı",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
 
-// app_ar.arb
-{
-  "@@locale": "ar",
-  "appTitle": "متتبع العادات",
-  "welcomeMessage": "مرحباً بك!",
-  "addHabit": "إضافة عادة",
-  "settings": "الإعدادات",
-  "statistics": "الإحصائيات",
-  "profile": "الملف الشخصي",
-  "language": "اللغة",
-  "theme": "المظهر",
-  "darkMode": "الوضع الداكن",
-  "notifications": "الإشعارات",
-  "about": "حول"
-}
-```
+  "streakMessage": "{count} günlük seri!",
+  "@streakMessage": {
+    "description": "Seri mesajı",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
 
-### 2. Dil Yöneticisi
-```dart
-class DilYoneticisi {
-  static const List<Locale> desteklenenDiller = [
-    Locale('tr'),
-    Locale('en'),
-    Locale('ar'),
-  ];
-
-  static const varsayilanDil = Locale('tr');
-
-  static Future<void> dilDegistir(BuildContext context, Locale yeniDil) async {
-    if (desteklenenDiller.contains(yeniDil)) {
-      await EasyLocalization.of(context)?.setLocale(yeniDil);
-      await _tercihleriKaydet(yeniDil);
+  "completionRate": "%{rate} tamamlama",
+  "@completionRate": {
+    "description": "Tamamlama oranı",
+    "placeholders": {
+      "rate": {
+        "type": "double",
+        "format": "decimalPattern",
+        "example": "85.5"
+      }
     }
   }
+}
+```
 
-  static Future<void> _tercihleriKaydet(Locale dil) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('secili_dil', dil.languageCode);
+`lib/l10n/app_en.arb`:
+```json
+{
+  "appTitle": "Habit Tracker",
+  "habitCount": "{count} habits",
+  "streakMessage": "{count} day streak!",
+  "completionRate": "{rate}% completion"
+}
+```
+
+### 2. Yerelleştirme Servisi
+
+`lib/services/localization_service.dart`:
+```dart
+class LocalizationService {
+  static final _supportedLocales = [
+    Locale('tr', ''),  // Türkçe
+    Locale('en', ''),  // İngilizce
+    Locale('ar', ''),  // Arapça
+    Locale('de', ''),  // Almanca
+  ];
+
+  // Tarih formatı
+  static String formatDate(DateTime date) {
+    return DateFormat.yMMMd(
+      Localizations.localeOf(context).languageCode,
+    ).format(date);
   }
 
-  static bool rtlMi(BuildContext context) {
-    return Directionality.of(context) == TextDirection.rtl;
+  // Saat formatı
+  static String formatTime(DateTime time) {
+    return DateFormat.Hm(
+      Localizations.localeOf(context).languageCode,
+    ).format(time);
   }
 
-  static String tarihFormatla(DateTime tarih, BuildContext context) {
-    final dil = EasyLocalization.of(context)?.locale ?? varsayilanDil;
-    return DateFormat.yMMMd(dil.toString()).format(tarih);
+  // Para birimi formatı
+  static String formatCurrency(double amount) {
+    final locale = Localizations.localeOf(context);
+    final symbol = locale.languageCode == 'tr' ? '₺' : '\$';
+
+    return NumberFormat.currency(
+      locale: locale.toString(),
+      symbol: symbol,
+    ).format(amount);
+  }
+
+  // Yüzde formatı
+  static String formatPercent(double percent) {
+    return NumberFormat.percentPattern(
+      Localizations.localeOf(context).languageCode,
+    ).format(percent / 100);
   }
 }
 ```
 
-### 3. Yerelleştirme Ayarları
+### 3. RTL Desteği
+
+`lib/widgets/habit_card.dart`:
 ```dart
-class YerellestirmeAyarlari extends StatelessWidget {
+class HabitCard extends StatelessWidget {
+  final Habit habit;
+
+  const HabitCard({
+    Key? key,
+    required this.habit,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        EasyLocalization.of(context)!.delegate,
-      ],
-      supportedLocales: DilYoneticisi.desteklenenDiller,
-      locale: EasyLocalization.of(context)?.locale,
-      builder: (context, child) {
-        return Directionality(
-          textDirection: DilYoneticisi.rtlMi(context)
-              ? TextDirection.rtl
-              : TextDirection.ltr,
-          child: child!,
-        );
-      },
-      // ... diğer uygulama ayarları
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: isRTL ? 0 : 16.0,
+          right: isRTL ? 16.0 : 0,
+        ),
+        child: Row(
+          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+          children: [
+            Icon(habit.icon),
+            SizedBox(width: 8.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: isRTL
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
+                children: [
+                  Text(habit.title),
+                  Text(habit.description),
+                ],
+              ),
+            ),
+            HabitProgress(progress: habit.progress),
+          ],
+        ),
+      ),
     );
   }
 }
 ```
 
-## 🎯 Öğrenme Hedefleri
+### 4. Dil Seçimi
 
-Bu hafta:
-- Uluslararasılaştırma prensiplerini
-- ARB dosyası yönetimini
-- RTL desteği eklemeyi
-- Yerel format kullanımını
-öğrenmiş olacaksınız.
+`lib/screens/settings_screen.dart`:
+```dart
+class SettingsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).settingsTitle),
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            title: Text(AppLocalizations.of(context).language),
+            trailing: LanguageDropdown(),
+          ),
+          SwitchListTile(
+            value: Theme.of(context).brightness == Brightness.dark,
+            onChanged: (value) {
+              // Tema değiştir
+            },
+            title: Text(AppLocalizations.of(context).darkMode),
+          ),
+          ListTile(
+            title: Text(AppLocalizations.of(context).notifications),
+            trailing: Icon(Icons.chevron_right),
+            onTap: () {
+              // Bildirim ayarları
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-## 📝 Özelleştirme Önerileri
+class LanguageDropdown extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<String>(
+      value: Localizations.localeOf(context).languageCode,
+      items: [
+        DropdownMenuItem(
+          value: 'tr',
+          child: Text('Türkçe'),
+        ),
+        DropdownMenuItem(
+          value: 'en',
+          child: Text('English'),
+        ),
+        DropdownMenuItem(
+          value: 'ar',
+          child: Text('العربية'),
+        ),
+        DropdownMenuItem(
+          value: 'de',
+          child: Text('Deutsch'),
+        ),
+      ],
+      onChanged: (String? languageCode) {
+        if (languageCode != null) {
+          context.read<LocaleProvider>().setLocale(
+                Locale(languageCode),
+              );
+        }
+      },
+    );
+  }
+}
+```
 
-1. Dil Desteği:
-   - Yeni diller ekleyin
-   - Dil algılama
-   - Otomatik çeviri
-   - Dil tercihi kaydetme
+## 🎯 Ödevler
 
-2. Kültürel Uyarlamalar:
-   - Bölgesel takvimler
-   - Para birimleri
-   - Ölçü birimleri
-   - Renk tercihleri
+1. Çeviri:
+   - [ ] Tüm metinleri ARB'ye taşıyın
+   - [ ] Eksik çevirileri tamamlayın
+   - [ ] Placeholder'ları kontrol edin
+   - [ ] Çeviri kalitesini test edin
 
-3. Yerelleştirme:
-   - Bölgesel içerik
-   - Yerel tatiller
-   - Kültürel ikonlar
-   - Bölgesel temalar
+2. Yerelleştirme:
+   - [ ] Tarih formatlarını ayarlayın
+   - [ ] Sayı formatlarını düzenleyin
+   - [ ] Para birimlerini ekleyin
+   - [ ] Ölçü birimlerini uyarlayın
 
-## 💡 Sonraki Hafta
+3. RTL:
+   - [ ] Layout'ları test edin
+   - [ ] İkonları uyarlayın
+   - [ ] Margin/padding'leri düzeltin
+   - [ ] Scroll yönlerini ayarlayın
 
-Gelecek hafta ekleyeceğimiz özellikler:
-- Widget testleri
-- Entegrasyon testleri
-- Kullanıcı arayüzü testleri
-- Test otomasyonu
+## 🔍 Kontrol Listesi
 
-## 🔍 Önemli Notlar
+1. Çeviri:
+   - [ ] Tüm metinler çevrildi mi?
+   - [ ] Placeholder'lar doğru mu?
+   - [ ] Format hataları var mı?
+   - [ ] Çeviriler anlamlı mı?
 
-- Tüm metinleri yerelleştirin
-- RTL desteğini test edin
-- Tarih/saat formatlarını kontrol edin
-- Kültürel hassasiyetlere dikkat edin 
+2. Yerelleştirme:
+   - [ ] Tarihler doğru mu?
+   - [ ] Sayılar düzgün mü?
+   - [ ] Para birimleri uygun mu?
+   - [ ] Ölçü birimleri mantıklı mı?
+
+3. RTL:
+   - [ ] Layout bozulmuyor mu?
+   - [ ] İkonlar doğru yönde mi?
+   - [ ] Metinler okunabiliyor mu?
+   - [ ] Scroll doğru çalışıyor mu?
+
+## 💡 İpuçları
+
+1. Çeviri:
+   - Context'e dikkat edin
+   - Uzun metinleri test edin
+   - Özel karakterleri kontrol edin
+   - Tutarlılığı koruyun
+
+2. RTL:
+   - Flexible widget kullanın
+   - Simetrik padding verin
+   - İkon yönlerini kontrol edin
+   - TextDirection kullanın
+
+## 📚 Faydalı Kaynaklar
+
+- [Flutter Localization Guide](https://flutter.dev/docs/development/accessibility-and-localization/internationalization)
+- [ARB Format](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification)
+- [RTL Best Practices](https://material.io/design/usability/bidirectionality.html)
+- [Intl Package](https://pub.dev/packages/intl) 
