@@ -1,78 +1,56 @@
-# Hafta 1 - Alışkanlık Takip Uygulaması: Başlangıç
+# Hafta 1 - Ana Proje: Alışkanlık Takip Uygulaması
 
-Bu hafta, Flutter ile temel bir uygulama yapısı oluşturacağız ve Material Design prensiplerini öğreneceğiz.
+Bu hafta, alışkanlık takip uygulamamızın temellerini atacağız. Flutter'ın temel widget'larını kullanarak ana sayfa tasarımını yapacağız.
 
-## 📱 Bu Haftanın Yenilikleri
+## 🎯 Hedefler
 
-- Flutter kurulumu
-- Temel widget'lar
-- Material Design kullanımı
-- Basit sayfa yapısı
+1. Proje yapısının oluşturulması
+2. Ana sayfa tasarımının yapılması
+3. Temel navigation sisteminin kurulması
+4. Theme ayarlarının yapılandırılması
 
-## 🚀 Kurulum Adımları
+## 📱 Ekran Tasarımları
 
-1. Flutter SDK'yı kurun:
-```bash
-# Windows için
-git clone https://github.com/flutter/flutter.git
-# Ortam değişkenlerine Flutter'ı ekleyin
+[Ana sayfa tasarımının ekran görüntüsü]
 
-# macOS için
-brew install flutter
+## 💻 Adım Adım Geliştirme
 
-# Linux için
-sudo snap install flutter --classic
+### 1. Proje Yapısı
+
+```
+lib/
+├── main.dart           # Ana uygulama dosyası
+├── screens/           # Ekranlar
+│   └── home_page.dart  # Ana sayfa
+├── widgets/           # Özel widget'lar
+├── models/            # Veri modelleri
+├── utils/            # Yardımcı fonksiyonlar
+└── theme/            # Tema ayarları
 ```
 
-2. Yeni bir Flutter projesi oluşturun:
-```bash
-flutter create habit_tracker
-cd habit_tracker
-```
+### 2. Ana Uygulama Yapısı
 
-3. `pubspec.yaml` dosyasını güncelleyin:
-```yaml
-name: habit_tracker
-description: Alışkanlık takip uygulaması.
-publish_to: 'none'
-version: 1.0.0+1
+`lib/main.dart` dosyasını oluşturun:
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
-
-dependencies:
-  flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.2
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^2.0.0
-
-flutter:
-  uses-material-design: true
-```
-
-4. `lib/main.dart` dosyasını oluşturun.
-
-## 🔍 Kod İncelemesi
-
-### 1. Ana Uygulama Yapısı
 ```dart
+import 'package:flutter/material.dart';
+import 'screens/home_page.dart';
+
 void main() {
-  runApp(const HabitTrackerApp());
+  runApp(const AliskanlikTakipApp());
 }
 
-class HabitTrackerApp extends StatelessWidget {
-  const HabitTrackerApp({super.key});
+class AliskanlikTakipApp extends StatelessWidget {
+  const AliskanlikTakipApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Alışkanlık Takip',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+        ),
         useMaterial3: true,
       ),
       home: const AnaSayfa(),
@@ -81,8 +59,13 @@ class HabitTrackerApp extends StatelessWidget {
 }
 ```
 
-### 2. Ana Sayfa Yapısı
+### 3. Ana Sayfa Tasarımı
+
+`lib/screens/home_page.dart` dosyasını oluşturun:
+
 ```dart
+import 'package:flutter/material.dart';
+
 class AnaSayfa extends StatelessWidget {
   const AnaSayfa({super.key});
 
@@ -90,54 +73,106 @@ class AnaSayfa extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alışkanlık Takip'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Alışkanlıklarım'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              // TODO: Yeni alışkanlık ekleme
+            },
+          ),
+        ],
       ),
       body: const Center(
-        child: Text('Hoş Geldiniz!'),
+        child: Text('Henüz alışkanlık eklenmedi'),
       ),
     );
   }
 }
 ```
 
-## 🎯 Öğrenme Hedefleri
+### 4. Tema Ayarları
 
-Bu hafta:
-- Flutter geliştirme ortamını kurmayı
-- Temel widget'ları kullanmayı
-- Material Design prensiplerini uygulamayı
-- Basit bir sayfa yapısı oluşturmayı
-öğrenmiş olacaksınız.
+`lib/theme/app_theme.dart` dosyasını oluşturun:
 
-## 📝 Özelleştirme Önerileri
+```dart
+import 'package:flutter/material.dart';
 
-1. Tema:
-   - Kendi renk şemanızı oluşturun
-   - Özel yazı tipleri ekleyin
-   - Dark/Light tema desteği ekleyin
+class AppTheme {
+  static ThemeData get light {
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.deepPurple,
+      ),
+      useMaterial3: true,
+      appBarTheme: const AppBarTheme(
+        centerTitle: true,
+        elevation: 0,
+      ),
+    );
+  }
 
-2. Sayfa Yapısı:
-   - AppBar'a menü ekleyin
-   - Floating action button ekleyin
-   - Drawer menü ekleyin
+  static ThemeData get dark {
+    return ThemeData.dark().copyWith(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.deepPurple,
+        brightness: Brightness.dark,
+      ),
+      useMaterial3: true,
+    );
+  }
+}
+```
 
-3. Widget'lar:
-   - Card widget'ı kullanın
-   - ListView ekleyin
-   - Custom widget'lar oluşturun
+## 🎯 Ödevler
 
-## 💡 Sonraki Hafta
+1. Temel Özellikler:
+   - [ ] AppBar'a profil ikonu ekleyin
+   - [ ] Drawer menüsü ekleyin
+   - [ ] Bottom navigation bar ekleyin
+   - [ ] Floating action button ekleyin
 
-Gelecek hafta ekleyeceğimiz özellikler:
-- Alışkanlık listesi
-- Form işlemleri
-- StatefulWidget kullanımı
-- Temel state yönetimi
+2. UI Geliştirmeleri:
+   - [ ] Özel renk paleti oluşturun
+   - [ ] Custom font ekleyin
+   - [ ] Tema geçişi için buton ekleyin
+   - [ ] Splash screen tasarlayın
 
-## 🔍 Önemli Notlar
+## 🔍 Kontrol Listesi
 
-- Hot Reload özelliğini etkin kullanın
-- Widget ağacını düzgün yapılandırın
-- Material Design kurallarına uyun
-- Kodunuzu düzenli tutun 
+Her değişiklik sonrası şunları kontrol edin:
+- [ ] Hot reload çalışıyor mu?
+- [ ] UI tasarımı bozuk görünen yer var mı?
+- [ ] Tema değişikliği düzgün çalışıyor mu?
+- [ ] Navigation sorunsuz çalışıyor mu?
+
+## 💡 İpuçları
+
+1. Widget Ağacı:
+   - Karmaşık UI'ları küçük widget'lara bölün
+   - `const` constructor kullanmayı unutmayın
+   - Widget parametrelerini named yapın
+
+2. Tema:
+   - Material 3 tasarım ilkelerini takip edin
+   - Renk paleti oluştururken contrast oranlarına dikkat edin
+   - Dark tema desteğini baştan planlayın
+
+3. Performans:
+   - Gereksiz build işlemlerinden kaçının
+   - Büyük listelerde `ListView.builder` kullanın
+   - Resimleri optimize edin
+
+## 📚 Faydalı Kaynaklar
+
+- [Material 3 Tasarım Rehberi](https://m3.material.io/)
+- [Flutter Navigation Örnekleri](https://flutter.dev/docs/cookbook/navigation)
+- [Flutter Theme Dokümantasyonu](https://api.flutter.dev/flutter/material/ThemeData-class.html)
+
+## 🔄 Geri Bildirim
+
+Aşağıdaki konularda geri bildirim verin:
+1. Kod organizasyonu
+2. UI/UX tasarımı
+3. Performans optimizasyonu
+4. Best practices uyumu 

@@ -1,156 +1,95 @@
-# Hafta 1: Flutter'a Giriş ve Kurulum
+# Hafta 1 - Flutter'a Giriş ve İlk Uygulama
 
-## 🎯 Hedefler
+Merhaba! Bu hafta Flutter dünyasına ilk adımımızı atacağız. Basit bir sayaç uygulaması yaparak Flutter'ın temel kavramlarını öğreneceğiz.
+
+## 🎯 Bu Hafta Neler Öğreneceğiz?
+
 - Flutter geliştirme ortamının kurulumu
-- İlk Flutter projesinin oluşturulması
-- Temel widget kavramının anlaşılması
-- Basit bir UI oluşturma
+- Widget kavramı ve temel widget'lar
+- StatelessWidget ve StatefulWidget farkı
+- Hot Reload özelliğinin kullanımı
+- Basit state yönetimi
+- Temel UI bileşenleri
 
-## 📝 Konu Başlıkları
-1. [Flutter Nedir?](#flutter-nedir)
-2. [Kurulum Adımları](#kurulum-adımları)
-3. [İlk Uygulama](#ilk-uygulama)
-4. [Temel Widgetlar](#temel-widgetlar)
-5. [Alıştırmalar](#alıştırmalar)
+## 📚 Konu Anlatımı
 
-## Flutter Nedir?
+### Flutter Nedir?
 
-Flutter, Google tarafından geliştirilen açık kaynaklı bir UI toolkit'tir. Tek bir kod tabanından iOS, Android, web ve masaüstü uygulamaları geliştirmenize olanak sağlar.
+Flutter, Google tarafından geliştirilen ve tek bir kod tabanından mobil, web ve masaüstü uygulamaları geliştirmenize olanak sağlayan bir UI framework'üdür. Dart programlama dilini kullanır ve "her şey bir widget" felsefesine dayanır.
 
-### Flutter'ın Avantajları:
-- Hızlı geliştirme (Hot Reload özelliği)
-- Zengin widget kütüphanesi
-- Yüksek performans
-- Özelleştirilebilir tasarım
-- Çoklu platform desteği
+### Widget Nedir?
 
-## Kurulum Adımları
+Widget'lar, Flutter'da kullanıcı arayüzünü oluşturan yapı taşlarıdır. İki temel widget türü vardır:
 
-### 1. Flutter SDK Kurulumu
+1. **StatelessWidget**: Durumu olmayan, statik widget'lar
+   - Değişmeyen UI elemanları için kullanılır
+   - Performanslıdır
+   - Örnek: Text, Icon, Image
 
-#### Windows için:
-1. [Flutter SDK](https://flutter.dev/docs/get-started/install/windows)'yı indirin
-2. ZIP dosyasını `C:\src\flutter` konumuna çıkartın
-3. `flutter/bin` klasörünü PATH'e ekleyin
+2. **StatefulWidget**: Durumu olan, dinamik widget'lar
+   - Değişen veriye sahip UI elemanları için kullanılır
+   - setState() ile yeniden çizilir
+   - Örnek: Form, Checkbox, TextField
 
-#### macOS için:
-```bash
-# Homebrew ile kurulum
-brew install flutter
-```
+## 💻 Örnek Uygulama: Gelişmiş Sayaç
 
-#### Linux için:
-```bash
-# SDK'yı indirin ve çıkartın
-cd ~/development
-tar xf ~/Downloads/flutter_linux_3.x.x-stable.tar.xz
+Bu haftaki örnek uygulamamızda, Flutter'ın temel kavramlarını öğrenmek için gelişmiş bir sayaç uygulaması yapacağız. Uygulamamız şu özelliklere sahip olacak:
 
-# PATH'e ekleyin
-export PATH="$PATH:`pwd`/flutter/bin"
-```
+- Artırma/azaltma butonları
+- Sıfırlama butonu
+- Renkli sayaç gösterimi
+- 10'un katlarında özel animasyon
+- Karanlık/Aydınlık tema desteği
+- Sayaç geçmişi
 
-### 2. VS Code Kurulumu
-1. [VS Code](https://code.visualstudio.com/)'u indirin ve kurun
-2. Flutter ve Dart eklentilerini yükleyin:
-   - Flutter
-   - Dart
-   - Awesome Flutter Snippets
-   - Flutter Widget Snippets
+Örnek uygulamanın detaylı anlatımı için [tıklayınız](./ornek_uygulama/README.md).
 
-### 3. Gerekli SDK'ların Kurulumu
-```bash
-# Bağımlılıkları kontrol edin
-flutter doctor
+## 🚀 Ana Proje: Alışkanlık Takip Uygulaması
 
-# Eksik bağımlılıkları yükleyin
-flutter doctor --android-licenses
-```
+Bu hafta ana projemizde şunları yapacağız:
 
-## İlk Uygulama
+1. Proje yapısının oluşturulması
+2. Ana sayfa tasarımı
+3. Temel navigation yapısı
+4. Theme ayarları
 
-### 1. Proje Oluşturma
-```bash
-flutter create habit_tracker
-cd habit_tracker
-```
+Ana proje detayları için [tıklayınız](./ana_proje/README.md).
 
-### 2. Proje Yapısı
-```
-habit_tracker/
-├── android/         # Android özgü dosyalar
-├── ios/            # iOS özgü dosyalar
-├── lib/            # Dart kodları
-│   └── main.dart   # Ana uygulama dosyası
-├── test/           # Test dosyaları
-└── pubspec.yaml    # Proje konfigürasyonu
-```
+## 🎯 Alıştırmalar
 
-### 3. Uygulamayı Çalıştırma
-```bash
-flutter run
-```
+1. Temel Özellikler:
+   - [ ] Sıfırlama butonu ekleyin
+   - [ ] Çift/tek sayı kontrolü yapın
+   - [ ] Maksimum/minimum limit koyun
 
-## Temel Widgetlar
+2. UI Geliştirmeleri:
+   - [ ] Karanlık tema desteği ekleyin
+   - [ ] Sayaç değişiminde animasyon yapın
+   - [ ] Özel font kullanın
 
-### MaterialApp
-```dart
-MaterialApp(
-  title: 'Habit Tracker',
-  theme: ThemeData(
-    primarySwatch: Colors.blue,
-  ),
-  home: MyHomePage(),
-)
-```
+## 🔍 Hata Ayıklama İpuçları
 
-### Scaffold
-```dart
-Scaffold(
-  appBar: AppBar(
-    title: Text('Habit Tracker'),
-  ),
-  body: Center(
-    child: Text('Merhaba Flutter!'),
-  ),
-)
-```
+- Widget Inspector'ı kullanın (Flutter DevTools)
+- `print` ile değişkenleri kontrol edin
+- Hot Reload çalışmazsa Hot Restart deneyin
 
-## Alıştırmalar
+## 📚 Faydalı Kaynaklar
 
-### 1. Temel Uygulama
-- Yeni bir Flutter projesi oluşturun
-- Ana sayfaya bir başlık ekleyin
-- Ortada bir metin gösterin
-- Bir buton ekleyin
-
-### 2. Widget Ağacı
-- Column widget'ı kullanarak dikey bir düzen oluşturun
-- En az 3 farklı widget ekleyin
-- Widgetlar arasına boşluk ekleyin
-
-### 3. Stil ve Tema
-- Uygulamanın ana rengini değiştirin
-- Yazı stillerini özelleştirin
-- AppBar'a bir ikon ekleyin
-
-## 📚 Kaynaklar
-- [Flutter Resmi Dokümantasyon](https://flutter.dev/docs)
 - [Flutter Widget Kataloğu](https://flutter.dev/docs/development/ui/widgets)
-- [Dart Programlama Dili](https://dart.dev/guides)
-- [Material Design](https://material.io/design)
+- [Flutter'da State Yönetimi](https://flutter.dev/docs/development/data-and-backend/state-mgmt/intro)
+- [Material Design Rehberi](https://material.io/design)
 
-## 📝 Ödev
-1. Kendi Flutter projenizi oluşturun
-2. En az 3 farklı widget kullanın
-3. Özel bir tema oluşturun
-4. Projenizi GitHub'a yükleyin
+## ✅ Haftalık Görevler
 
-## 🔍 Sık Sorulan Sorular
-1. Flutter SDK bulunamıyor hatası alıyorum?
-   - PATH ayarlarınızı kontrol edin
-   
-2. Emulator açılmıyor?
-   - Android Studio'dan AVD Manager'ı kontrol edin
-   
-3. Hot Reload çalışmıyor?
-   - Uygulamanın çalışır durumda olduğundan emin olun 
+1. Örnek uygulamayı tamamlayın
+2. Ana projedeki bu haftaki görevleri yapın
+3. Alıştırmaları çözün
+4. Öğrendiklerinizi blog yazısına dönüştürün
+
+## 💪 Sonraki Hafta
+
+Gelecek hafta şunları öğreneceğiz:
+- Liste görünümleri
+- Gesture detector'lar
+- Dialog ve bottom sheet'ler
+- Form elemanları 
