@@ -1,111 +1,115 @@
-# Flutter Türkçe Eğitim Kaynağı
+# Flutter ile Alışkanlık Takip Uygulaması Geliştirme
 
-Bu repository, Flutter öğrenmek isteyenler için hazırlanmış kapsamlı bir Türkçe kaynaktır. Başlangıç seviyesinden ileri seviyeye kadar Flutter geliştirme konularını adım adım öğrenebilirsiniz.
+Bu repo, "İleri Programlama" dersi kapsamında Flutter ile adım adım bir alışkanlık takip uygulaması geliştirmeyi öğreten bir eğitim serisidir.
 
-## 🚀 Başlarken
+## 📱 Ana Proje: Alışkanlık Takip Uygulaması
 
-Flutter geliştirmeye başlamak için gereken tüm kurulumlar ve temel bilgiler:
+Her hafta yeni özellikler ekleyerek geliştireceğimiz ana projemiz, kullanıcıların günlük alışkanlıklarını takip edebilecekleri bir mobil uygulama olacak.
 
-- [Kurulum Rehberi](./docs/kurulum.md)
-- [Dart Dili Temelleri](./docs/dart-temelleri.md)
-- [İlk Flutter Uygulaması](./docs/ilk-uygulama.md)
+### Özellikler:
+- Alışkanlık oluşturma ve düzenleme
+- Günlük, haftalık ve aylık hedefler
+- İstatistikler ve raporlama
+- Çoklu veritabanı desteği (SQLite, PostgreSQL, MongoDB)
+- REST API entegrasyonu
+- Bildirim sistemi
+- Container tabanlı deployment
 
-## 📚 İçerik Başlıkları
+## 📚 Haftalık İçerik
 
-### 📱 Temel Flutter Geliştirme
-- Widget'lar ve UI Temelleri
-- State Management
-- Navigation ve Routing
-- Form İşlemleri ve Validasyon
+### Temel Konular (Hafta 1-4)
+- **[Hafta 1: Flutter'a Giriş ve Kurulum](docs/hafta1/)**
+  - Ana Proje: Proje oluşturma ve temel UI
+  - Örnek: Basit sayaç uygulaması
+  
+- **[Hafta 2: Flutter Temelleri ve Widget'lar](docs/hafta2/)**
+  - Ana Proje: Alışkanlık listeleme ekranı
+  - Örnek: TODO uygulaması
+  
+- **[Hafta 3: State Management ve Navigation](docs/hafta3/)**
+  - Ana Proje: Çoklu sayfa yapısı ve veri yönetimi
+  - Örnek: Hava durumu uygulaması
+  
+- **[Hafta 4: Form İşlemleri ve Validasyon](docs/hafta4/)**
+  - Ana Proje: Alışkanlık oluşturma formu
+  - Örnek: Kayıt formu uygulaması
 
-### 💾 Veri Yönetimi
-- PostgreSQL ile Veritabanı İşlemleri
-- MongoDB ve NoSQL
-- REST API Entegrasyonu
-- Yerel Veri Depolama
-- Firebase Kullanımı
+### Veritabanı ve Backend (Hafta 5-9)
+- **[Hafta 5: Yerel Veritabanı (SQLite)](docs/hafta5/)**
+  - Ana Proje: Yerel veri depolama
+  - Örnek: Not defteri uygulaması
+  
+- **[Hafta 6-7: PostgreSQL Entegrasyonu](docs/hafta6-7/)**
+  - Ana Proje: Uzak veritabanı bağlantısı
+  - Örnek: Çevrimiçi blog uygulaması
+  
+- **[Hafta 8-9: MongoDB Entegrasyonu](docs/hafta8-9/)**
+  - Ana Proje: NoSQL veritabanı entegrasyonu
+  - Örnek: Sosyal medya feed uygulaması
 
-### 🔧 İleri Seviye Konular
-- State Management (Bloc, GetX, Riverpod)
-- Docker Container'ları
-- CI/CD ve DevOps
-- Platform Özellikleri
-- Production Deployment
+### İleri Seviye Konular (Hafta 10-14)
+- **[Hafta 10: REST API ve Web Servisleri](docs/hafta10/)**
+  - Ana Proje: API entegrasyonu
+  - Örnek: Film listesi uygulaması
+  
+- **[Hafta 11: Bildirimler ve Arka Plan Görevleri](docs/hafta11/)**
+  - Ana Proje: Hatırlatıcı sistemi
+  - Örnek: Zamanlayıcı uygulaması
+  
+- **[Hafta 12: Docker ve Container](docs/hafta12/)**
+  - Ana Proje: Container yapısı
+  - Örnek: Basit backend servisi
+  
+- **[Hafta 13: Test ve Deployment](docs/hafta13/)**
+  - Ana Proje: Test yazımı ve dağıtım
+  - Örnek: CI/CD pipeline
+  
+- **[Hafta 14: Final Projesi](docs/hafta14/)**
+  - Ana Projenin Tamamlanması
+  - Sunum ve Değerlendirme
 
-## 🎯 Öğrenme Yolu
+## 🔧 Gereksinimler
 
-Flutter'ı etkili bir şekilde öğrenmek için önerilen yol:
+- Flutter SDK (son sürüm)
+- VS Code veya Android Studio
+- Git
+- PostgreSQL
+- MongoDB
+- Docker
 
-1. **Başlangıç Seviyesi**
-   - Dart dili ve Flutter temelleri
-   - Widget kavramı ve temel widget'lar
-   - Basit UI tasarımı
+## 💡 Nasıl Başlarım?
 
-2. **Orta Seviye**
-   - State management
-   - Veritabanı işlemleri
-   - HTTP istekleri ve API entegrasyonu
+1. Bu repoyu klonlayın:
+```bash
+git clone https://github.com/kullanici/flutter-habit-tracker.git
+```
 
-3. **İleri Seviye**
-   - İleri state management
-   - Docker ve deployment
-   - Performance optimizasyonu
+2. [Hafta 1](docs/hafta1/) dokümanını takip ederek geliştirme ortamınızı hazırlayın.
+
+3. Her hafta için:
+   - Önce o haftanın örnek uygulamasını inceleyin
+   - Örnek uygulamayı kodlayın
+   - Ana projeye yeni özellikleri ekleyin
+
+## 📝 Değerlendirme
+
+- Haftalık Ödevler (%30)
+  - Örnek uygulamaları geliştirme
+  - Ana projeye katkılar
+  
+- Vize Projesi (%30)
+  - 7. hafta sonunda ana projenin ilk aşaması
+  - Yerel veritabanı ve temel özelliklerin tamamlanması
+  
+- Final Projesi (%40)
+  - Ana projenin tamamlanması
+  - Tüm özelliklerin çalışır durumda olması
+  - Dokümantasyon ve sunum
+
+## 🤝 Katkıda Bulunma
+
+Bu eğitim materyalini geliştirmek için önerileriniz varsa, lütfen bir Issue açın veya Pull Request gönderin.
 
 ## 📜 Lisans
 
-Bu proje MIT lisansı ile lisanslanmıştır - Detaylar için [LICENSE](LICENSE) dosyasına bakınız.
-
-## 📱 HabitMaster Projesi
-
-Bu eğitim boyunca adım adım geliştireceğimiz HabitMaster, alışkanlık kazandırma ve görev takibi yapmanızı sağlayan kapsamlı bir Flutter uygulamasıdır.
-
-### Proje Özellikleri
-
-- 🎯 Farklı türlerde alışkanlık ve görev oluşturma
-  - Günlük görevler (kitap okuma, egzersiz vb.)
-  - Haftalık görevler (kütüphane ziyareti vb.)
-  - Periyodik görevler (akraba araması vb.)
-  
-- ⏰ Akıllı Hatırlatma Sistemi
-  - Görev zamanı bildirimler
-  - Özelleştirilebilir alarm sistemi
-  - Tekrarlanan görev yönetimi
-
-- 📊 İlerleme Takibi
-  - Alışkanlık istatistikleri
-  - Başarı grafikleri
-  - Streak (kesintisiz devam) takibi
-
-- 🔄 Senkronizasyon
-  - Çevrimdışı kullanım
-  - Bulut yedekleme
-  - Çoklu cihaz desteği
-
-### Proje Aşamaları
-
-1. **Temel Yapı ve UI (1-3. Haftalar)**
-   - Proje kurulumu
-   - Temel UI tasarımı
-   - Ana ekranlar ve navigasyon
-
-2. **Veri Yönetimi (4-6. Haftalar)**
-   - Yerel veritabanı yapısı
-   - CRUD işlemleri
-   - State management
-
-3. **Bildirim Sistemi (7-9. Haftalar)**
-   - Yerel bildirimler
-   - Alarm yönetimi
-   - Arka plan servisleri
-
-4. **Backend Entegrasyonu (10-12. Haftalar)**
-   - API tasarımı
-   - Kullanıcı yönetimi
-   - Veri senkronizasyonu
-
-5. **İleri Özellikler (13-14. Haftalar)**
-   - İstatistik ve raporlama
-   - Widget'lar
-   - Deployment
-
-### 📂 Proje Klasör Yapısı
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
