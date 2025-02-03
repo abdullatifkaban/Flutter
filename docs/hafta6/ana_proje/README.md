@@ -1,187 +1,462 @@
-# Hafta 6 - Alışkanlık Takip Uygulaması: Performans ve Çevrimdışı Mod
+# Hafta 6 - Ana Proje: Durum Yönetimi
 
-Bu hafta, uygulamamıza çevrimdışı çalışma modu ekleyecek ve performans iyileştirmeleri yapacağız.
+Bu hafta, alışkanlık takip uygulamamıza durum yönetimi (state management) özelliklerini ekleyeceğiz.
 
-## 📱 Bu Haftanın Yenilikleri
+## 🎯 Hedefler
 
-- Çevrimdışı çalışma modu
-- SQLite entegrasyonu
-- Veri senkronizasyonu
-- Performans iyileştirmeleri
-- Hata ayıklama sistemi
+1. Provider ile Alışkanlık Yönetimi
+   - Alışkanlık listesi
+   - Alışkanlık detayları
+   - Alışkanlık durumu
+   - İlerleme takibi
 
-## 🚀 Kurulum Adımları
+2. Riverpod ile Tema ve Ayarlar
+   - Tema yönetimi
+   - Dil ayarları
+   - Bildirim tercihleri
+   - Görünüm seçenekleri
 
-1. Gerekli paketleri `pubspec.yaml` dosyasına ekleyin:
-```yaml
-dependencies:
-  sqflite: ^2.3.0
-  path: ^1.8.3
-  connectivity_plus: ^5.0.2
-  flutter_bloc: ^8.1.3
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
+3. Bloc ile İstatistikler
+   - Günlük istatistikler
+   - Haftalık grafikler
+   - Aylık raporlar
+   - Başarı analizleri
+
+4. Mimari Yapı
+   - Repository pattern
+   - Service layer
+   - Clean architecture
+   - Dependency injection
+
+## 📱 Ekran Tasarımları
+
+[Ekran tasarımlarının görselleri]
+
+## 💻 Uygulama Yapısı
+
+```
+lib/
+├── models/
+│   ├── habit.dart
+│   ├── progress.dart
+│   └── statistics.dart
+├── providers/
+│   ├── habit_provider.dart
+│   └── settings_provider.dart
+├── blocs/
+│   ├── statistics_bloc.dart
+│   ├── statistics_event.dart
+│   └── statistics_state.dart
+├── repositories/
+│   ├── habit_repository.dart
+│   └── settings_repository.dart
+├── services/
+│   ├── database_service.dart
+│   └── notification_service.dart
+└── screens/
+    ├── habits_screen.dart
+    ├── statistics_screen.dart
+    └── settings_screen.dart
 ```
 
-2. `lib` klasörü altında aşağıdaki dosyaları oluşturun:
-   - `database/local_database.dart`: SQLite veritabanı işlemleri
-   - `services/connectivity_service.dart`: İnternet bağlantısı kontrolü
-   - `services/sync_service.dart`: Veri senkronizasyonu
-   - `bloc/connectivity_bloc.dart`: Bağlantı durumu yönetimi
-   - `utils/performance.dart`: Performans iyileştirmeleri
+## 🚀 Başlangıç
 
-## 🔍 Kod İncelemesi
+1. Yeni bağımlılıkları ekleyin:
 
-### 1. Yerel Veritabanı
+```yaml
+dependencies:
+  provider: ^6.1.1
+  flutter_riverpod: ^2.4.9
+  flutter_bloc: ^8.1.3
+  get_it: ^7.6.4
+  injectable: ^2.3.2
+```
+
+## 💻 Adım Adım Geliştirme
+
+### 1. Provider ile Alışkanlık Yönetimi
+
+`lib/providers/habit_provider.dart` dosyasını oluşturun:
+
 ```dart
-class LocalDatabase {
-  static Database? _database;
-  
-  Future<Database> get database async {
-    _database ??= await _initDatabase();
-    return _database!;
+class HabitProvider with ChangeNotifier {
+  final HabitRepository _repository;
+  List<Habit> _habits = [];
+  bool _isLoading = false;
+
+  HabitProvider(this._repository) {
+    _loadHabits();
   }
 
-  Future<Database> _initDatabase() async {
-    final path = await getDatabasesPath();
-    final dbPath = join(path, 'aliskanlik_takip.db');
+  List<Habit> get habits => [..._habits];
+  bool get isLoading => _isLoading;
 
-    return await openDatabase(
-      dbPath,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE aliskanliklar (
-            id TEXT PRIMARY KEY,
-            baslik TEXT,
-            aciklama TEXT,
-            tamamlandi INTEGER,
-            olusturulma_tarihi TEXT,
-            senkronize_edildi INTEGER DEFAULT 0
-          )
-        ''');
-        // Diğer tablolar...
-      },
+  Future<void> _loadHabits() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _habits = await _repository.getHabits();
+    } catch (e) {
+      print('Hata: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> addHabit(Habit habit) async {
+    try {
+      final newHabit = await _repository.createHabit(habit);
+      _habits.add(newHabit);
+      notifyListeners();
+    } catch (e) {
+      print('Hata: $e');
+    }
+  }
+
+  Future<void> updateHabit(Habit habit) async {
+    try {
+      await _repository.updateHabit(habit);
+      final index = _habits.indexWhere((h) => h.id == habit.id);
+      if (index >= 0) {
+        _habits[index] = habit;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Hata: $e');
+    }
+  }
+
+  Future<void> deleteHabit(int id) async {
+    try {
+      await _repository.deleteHabit(id);
+      _habits.removeWhere((h) => h.id == id);
+      notifyListeners();
+    } catch (e) {
+      print('Hata: $e');
+    }
+  }
+
+  Future<void> toggleHabitStatus(int id, DateTime date) async {
+    try {
+      final habit = _habits.firstWhere((h) => h.id == id);
+      final progress = Progress(
+        habitId: id,
+        date: date,
+        status: ProgressStatus.completed,
+      );
+      
+      await _repository.saveProgress(progress);
+      notifyListeners();
+    } catch (e) {
+      print('Hata: $e');
+    }
+  }
+
+  List<Habit> getHabitsByCategory(String category) {
+    return _habits.where((h) => h.category == category).toList();
+  }
+
+  List<Habit> searchHabits(String query) {
+    return _habits.where((h) {
+      return h.title.toLowerCase().contains(query.toLowerCase()) ||
+          h.description.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+  }
+}
+```
+
+### 2. Riverpod ile Tema ve Ayarlar
+
+`lib/providers/settings_provider.dart` dosyasını oluşturun:
+
+```dart
+final settingsProvider =
+    StateNotifierProvider<SettingsNotifier, Settings>((ref) {
+  return SettingsNotifier();
+});
+
+class SettingsNotifier extends StateNotifier<Settings> {
+  SettingsNotifier() : super(Settings()) {
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    state = Settings(
+      themeMode: ThemeMode.values[prefs.getInt('themeMode') ?? 0],
+      language: prefs.getString('language') ?? 'tr',
+      notificationsEnabled: prefs.getBool('notifications') ?? true,
+      reminderTime: TimeOfDay(
+        hour: prefs.getInt('reminderHour') ?? 20,
+        minute: prefs.getInt('reminderMinute') ?? 0,
+      ),
+      weekStartDay: prefs.getInt('weekStart') ?? DateTime.monday,
+      chartType: prefs.getString('chartType') ?? 'line',
+    );
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('themeMode', mode.index);
+    state = state.copyWith(themeMode: mode);
+  }
+
+  Future<void> setLanguage(String language) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('language', language);
+    state = state.copyWith(language: language);
+  }
+
+  Future<void> setNotificationsEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notifications', enabled);
+    state = state.copyWith(notificationsEnabled: enabled);
+  }
+
+  Future<void> setReminderTime(TimeOfDay time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('reminderHour', time.hour);
+    await prefs.setInt('reminderMinute', time.minute);
+    state = state.copyWith(reminderTime: time);
+  }
+
+  Future<void> setWeekStartDay(int day) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('weekStart', day);
+    state = state.copyWith(weekStartDay: day);
+  }
+
+  Future<void> setChartType(String type) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('chartType', type);
+    state = state.copyWith(chartType: type);
+  }
+}
+```
+
+### 3. Bloc ile İstatistikler
+
+`lib/blocs/statistics_bloc.dart` dosyasını oluşturun:
+
+```dart
+// Events
+abstract class StatisticsEvent {}
+
+class LoadStatisticsEvent extends StatisticsEvent {
+  final DateTime startDate;
+  final DateTime endDate;
+  final String period;
+
+  LoadStatisticsEvent({
+    required this.startDate,
+    required this.endDate,
+    required this.period,
+  });
+}
+
+// States
+abstract class StatisticsState {}
+
+class StatisticsInitial extends StatisticsState {}
+
+class StatisticsLoading extends StatisticsState {}
+
+class StatisticsLoaded extends StatisticsState {
+  final List<Statistics> statistics;
+  final Map<String, double> completionRates;
+  final int totalHabits;
+  final int completedHabits;
+  final int currentStreak;
+  final int longestStreak;
+
+  StatisticsLoaded({
+    required this.statistics,
+    required this.completionRates,
+    required this.totalHabits,
+    required this.completedHabits,
+    required this.currentStreak,
+    required this.longestStreak,
+  });
+}
+
+class StatisticsError extends StatisticsState {
+  final String message;
+
+  StatisticsError(this.message);
+}
+
+// Bloc
+class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
+  final StatisticsRepository _repository;
+
+  StatisticsBloc(this._repository) : super(StatisticsInitial()) {
+    on<LoadStatisticsEvent>(_onLoadStatistics);
+  }
+
+  Future<void> _onLoadStatistics(
+    LoadStatisticsEvent event,
+    Emitter<StatisticsState> emit,
+  ) async {
+    emit(StatisticsLoading());
+
+    try {
+      final statistics = await _repository.getStatistics(
+        event.startDate,
+        event.endDate,
+      );
+
+      final completionRates = await _repository.getCompletionRates(
+        event.startDate,
+        event.endDate,
+      );
+
+      final totalHabits = await _repository.getTotalHabits();
+      final completedHabits = await _repository.getCompletedHabits(
+        event.startDate,
+        event.endDate,
+      );
+
+      final currentStreak = await _repository.getCurrentStreak();
+      final longestStreak = await _repository.getLongestStreak();
+
+      emit(StatisticsLoaded(
+        statistics: statistics,
+        completionRates: completionRates,
+        totalHabits: totalHabits,
+        completedHabits: completedHabits,
+        currentStreak: currentStreak,
+        longestStreak: longestStreak,
+      ));
+    } catch (e) {
+      emit(StatisticsError(e.toString()));
+    }
+  }
+}
+```
+
+### 4. Dependency Injection
+
+`lib/injection.dart` dosyasını oluşturun:
+
+```dart
+@InjectableInit()
+void configureDependencies() => getIt.init();
+
+@module
+abstract class RegisterModule {
+  @singleton
+  DatabaseService get databaseService => DatabaseService();
+
+  @singleton
+  HabitRepository get habitRepository => HabitRepository(
+        get<DatabaseService>(),
+      );
+
+  @singleton
+  StatisticsRepository get statisticsRepository => StatisticsRepository(
+        get<DatabaseService>(),
+      );
+
+  @singleton
+  SettingsRepository get settingsRepository => SettingsRepository();
+}
+```
+
+### 5. Ana Uygulama
+
+`lib/main.dart` dosyasını düzenleyin:
+
+```dart
+void main() {
+  configureDependencies();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => HabitProvider(getIt<HabitRepository>()),
+        ),
+        Provider(
+          create: (_) => StatisticsBloc(getIt<StatisticsRepository>()),
+        ),
+      ],
+      child: ProviderScope(
+        child: MyApp(),
+      ),
+    ),
+  );
+}
+
+class MyApp extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+
+    return MaterialApp(
+      title: 'Alışkanlık Takibi',
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: settings.themeMode,
+      locale: Locale(settings.language),
+      home: HomeScreen(),
     );
   }
 }
 ```
 
-### 2. Bağlantı Kontrolü
-```dart
-class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
-  final Connectivity _connectivity = Connectivity();
-  StreamSubscription? _subscription;
+## 🎯 Ödevler
 
-  ConnectivityBloc() : super(ConnectivityInitial()) {
-    on<ConnectivityChanged>((event, emit) {
-      if (event.hasConnection) {
-        emit(ConnectivityAvailable());
-      } else {
-        emit(ConnectivityUnavailable());
-      }
-    });
+1. Provider:
+   - [ ] Alışkanlık filtreleme ekleyin
+   - [ ] Sıralama seçenekleri ekleyin
+   - [ ] Arama özelliği ekleyin
+   - [ ] Çoklu seçim ekleyin
 
-    _subscription = _connectivity.onConnectivityChanged.listen((result) {
-      add(ConnectivityChanged(result != ConnectivityResult.none));
-    });
-  }
+2. Riverpod:
+   - [ ] Özel tema desteği ekleyin
+   - [ ] Font ayarları ekleyin
+   - [ ] Veri yedekleme ekleyin
+   - [ ] Çoklu dil desteği ekleyin
 
-  @override
-  Future<void> close() {
-    _subscription?.cancel();
-    return super.close();
-  }
-}
-```
+3. Bloc:
+   - [ ] PDF rapor oluşturma ekleyin
+   - [ ] Grafik türleri ekleyin
+   - [ ] Hedef analizi ekleyin
+   - [ ] Başarı tahminleri ekleyin
 
-### 3. Veri Senkronizasyonu
-```dart
-class SyncService {
-  final LocalDatabase _localDb;
-  final FirebaseServisi _firebaseDb;
-  final ConnectivityBloc _connectivityBloc;
+## 🔍 Kontrol Listesi
 
-  Future<void> senkronizeEt() async {
-    if (_connectivityBloc.state is ConnectivityUnavailable) {
-      return;
-    }
+Her değişiklik sonrası şunları kontrol edin:
+- [ ] State değişiklikleri doğru çalışıyor mu?
+- [ ] Widget'lar gereksiz rebuild olmuyor mu?
+- [ ] Memory leak var mı?
+- [ ] Error handling düzgün çalışıyor mu?
 
-    // Yerel değişiklikleri gönder
-    final senkronizeEdilmeyenler = await _localDb.getSenkronizeEdilmeyenler();
-    for (var veri in senkronizeEdilmeyenler) {
-      await _firebaseDb.guncelle(veri);
-      await _localDb.senkronizeEdildiIsaretle(veri.id);
-    }
+## 💡 İpuçları
 
-    // Sunucudaki değişiklikleri al
-    final sonGuncelleme = await _localDb.getSonGuncellemeTarihi();
-    final yeniVeriler = await _firebaseDb.getGuncellemeler(sonGuncelleme);
-    await _localDb.topluGuncelle(yeniVeriler);
-  }
-}
-```
+1. State Management:
+   - State'i immutable tutun
+   - Gereksiz notifyListeners çağrılarından kaçının
+   - State değişimlerini debug edin
+   - Provider kombinasyonlarını optimize edin
 
-### 4. Performans İyileştirmeleri
-```dart
-class PerformanceOptimizer {
-  static void listeyiOptimizeEt(ListView liste) {
-    // ListView.builder kullan
-    // Gereksiz build'leri önle
-    // Resimleri önbellekle
-  }
+2. Architecture:
+   - Business logic'i UI'dan ayırın
+   - Repository pattern kullanın
+   - Dependency injection kullanın
+   - SOLID prensiplerine uyun
 
-  static void bellegiOptimizeEt() {
-    // Gereksiz verileri temizle
-    // Önbellek boyutunu sınırla
-    // Büyük nesneleri dispose et
-  }
+3. Performance:
+   - Selector kullanın
+   - const constructor kullanın
+   - Lazy loading yapın
+   - Caching mekanizmaları ekleyin
 
-  static void animasyonlariOptimizeEt() {
-    // Donanım hızlandırma kullan
-    // Karmaşık animasyonları basitleştir
-    // Frame düşmelerini önle
-  }
-}
-```
+## 📚 Faydalı Kaynaklar
 
-## 🎯 Öğrenme Hedefleri
-
-Bu hafta:
-- SQLite veritabanı kullanımını
-- Çevrimdışı mod geliştirmeyi
-- Veri senkronizasyonunu
-- Performans optimizasyonunu
-öğrenmiş olacaksınız.
-
-## 📝 Özelleştirme Önerileri
-
-1. Veritabanı:
-   - Migrations ekleyin
-   - Veritabanı şifreleme ekleyin
-   - Yedekleme sistemi geliştirin
-
-2. Senkronizasyon:
-   - Çakışma çözümleme ekleyin
-   - Kısmi senkronizasyon ekleyin
-   - Senkronizasyon geçmişi tutun
-
-3. Performans:
-   - Lazy loading ekleyin
-   - Önbellek stratejisi geliştirin
-   - Widget ağacını optimize edin
-
-## 💡 Sonraki Hafta
-
-Gelecek hafta ekleyeceğimiz özellikler:
-- Gelişmiş analitik
-- A/B testleri
-- Kullanıcı geri bildirimleri
-- Hata raporlama sistemi
-
-## 🔍 Önemli Notlar
-
-- Çevrimdışı modda veri tutarlılığını sağlayın
-- Batarya kullanımını optimize edin
-- Bellek kullanımını kontrol edin
-- Düzenli performans testleri yapın 
+- [Provider Documentation](https://pub.dev/packages/provider)
+- [Riverpod Documentation](https://riverpod.dev)
+- [Bloc Library](https://bloclibrary.dev)
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) 
