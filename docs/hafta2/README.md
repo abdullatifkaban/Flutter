@@ -1,224 +1,136 @@
-# Hafta 2: Flutter Temelleri ve Widget'lar
+# Hafta 2 - Liste Görünümleri ve Kullanıcı Etkileşimleri
 
-## 🎯 Hedefler
-- Stateless ve Stateful Widget'ların farkını anlama
-- Temel layout widget'larını öğrenme
-- Gesture ve Input widget'larını kullanma
-- State yönetiminin temellerini kavrama
+Merhaba! Bu hafta Flutter'da liste görünümleri, kullanıcı etkileşimleri ve form elemanları üzerine çalışacağız. Basit bir TODO List uygulaması geliştirerek bu kavramları pratikte uygulayacağız.
 
-## 📝 Konu Başlıkları
-1. [Widget Türleri](#widget-türleri)
-2. [Layout Widget'ları](#layout-widgetları)
-3. [Gesture ve Input](#gesture-ve-input)
-4. [State Yönetimi](#state-yönetimi)
-5. [Alıştırmalar](#alıştırmalar)
+## 🎯 Bu Hafta Neler Öğreneceğiz?
 
-## Widget Türleri
+- Liste widget'ları (ListView, GridView)
+- Kullanıcı etkileşimleri (GestureDetector, InkWell)
+- Dialog ve bottom sheet'ler
+- Form elemanları ve validasyon
+- Snackbar ve Toast mesajları
 
-### Stateless Widgets
-Durumu değişmeyen, statik widget'lardır. Örneğin:
-- Text
-- Icon
-- RaisedButton
-- Container
+## 📚 Konu Anlatımı
 
-```dart
-class StatikWidget extends StatelessWidget {
-  final String metin;
-  
-  const StatikWidget({required this.metin});
-  
-  @override
-  Widget build(BuildContext context) {
-    return Text(metin);
-  }
-}
-```
+### Liste Widget'ları
 
-### Stateful Widgets
-Durumu değişebilen, dinamik widget'lardır. Örneğin:
-- Checkbox
-- TextField
-- Radio
-- Form
+Flutter'da iki temel liste widget'ı vardır:
 
-```dart
-class DinamikWidget extends StatefulWidget {
-  const DinamikWidget({super.key});
+1. **ListView**: Dikey veya yatay olarak kaydırılabilen liste görünümü
+   - `ListView`: Tüm elemanları aynı anda oluşturur
+   - `ListView.builder`: Elemanları görünür olduğunda oluşturur
+   - `ListView.separated`: Elemanlar arasına ayraç ekler
 
-  @override
-  State<DinamikWidget> createState() => _DinamikWidgetState();
-}
+2. **GridView**: Izgara şeklinde düzenlenmiş liste görünümü
+   - `GridView.count`: Sabit sütun sayısı
+   - `GridView.extent`: Sabit eleman genişliği
+   - `GridView.builder`: Lazy loading desteği
 
-class _DinamikWidgetState extends State<DinamikWidget> {
-  bool _durum = false;
+### Kullanıcı Etkileşimleri
 
-  @override
-  Widget build(BuildContext context) {
-    return Switch(
-      value: _durum,
-      onChanged: (yeniDeger) {
-        setState(() {
-          _durum = yeniDeger;
-        });
-      },
-    );
-  }
-}
-```
+Flutter'da kullanıcı etkileşimlerini yönetmek için:
 
-## Layout Widget'ları
+1. **GestureDetector**: Temel dokunma olayları
+   - `onTap`: Dokunma
+   - `onDoubleTap`: Çift dokunma
+   - `onLongPress`: Uzun basma
+   - `onPanUpdate`: Sürükleme
 
-### Container
-En temel layout widget'ı. Padding, margin, dekorasyon gibi özellikleri vardır.
+2. **InkWell**: Material Design dalga efekti
+   - GestureDetector'ın tüm özellikleri
+   - Splash ve highlight efektleri
+   - Ripple animasyonu
 
-```dart
-Container(
-  padding: EdgeInsets.all(8.0),
-  margin: EdgeInsets.symmetric(vertical: 10.0),
-  decoration: BoxDecoration(
-    color: Colors.blue,
-    borderRadius: BorderRadius.circular(8.0),
-  ),
-  child: Text('Merhaba'),
-)
-```
+### Dialog ve Bottom Sheet'ler
 
-### Row ve Column
-Yatay ve dikey düzen sağlar:
+1. **Dialog Türleri**:
+   - `AlertDialog`: Basit uyarı dialogları
+   - `SimpleDialog`: Seçenek listesi
+   - `CustomDialog`: Özelleştirilmiş dialoglar
 
-```dart
-Row(
-  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  children: [
-    Icon(Icons.star),
-    Text('Yıldızlı'),
-    Icon(Icons.star),
-  ],
-)
+2. **Bottom Sheet'ler**:
+   - `showModalBottomSheet`: Modal alt sayfa
+   - `showBottomSheet`: Kalıcı alt sayfa
+   - Sürüklenebilir tasarım
 
-Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    Text('Başlık'),
-    Text('Alt başlık'),
-    Text('İçerik'),
-  ],
-)
-```
+### Form Elemanları
 
-### Stack
-Widget'ları üst üste yerleştirir:
+1. **Form Widget'ları**:
+   - `TextField`: Metin girişi
+   - `TextFormField`: Validasyonlu metin girişi
+   - `Checkbox`: İşaret kutusu
+   - `Radio`: Seçenek düğmesi
+   - `Switch`: Açma/kapama düğmesi
+   - `Slider`: Değer kaydırıcı
 
-```dart
-Stack(
-  children: [
-    Image.asset('arkaplan.jpg'),
-    Positioned(
-      bottom: 10,
-      right: 10,
-      child: Text('Alt yazı'),
-    ),
-  ],
-)
-```
+2. **Form Validasyonu**:
+   - `Form` widget'ı
+   - `GlobalKey<FormState>`
+   - Validasyon fonksiyonları
+   - Hata mesajları
 
-## Gesture ve Input
+## 💻 Örnek Uygulama: TODO List
 
-### GestureDetector
-Dokunma olaylarını yakalar:
+Bu haftaki örnek uygulamamızda, öğrendiğimiz widget'ları kullanarak bir TODO List uygulaması geliştireceğiz. Uygulamamız şu özelliklere sahip olacak:
 
-```dart
-GestureDetector(
-  onTap: () {
-    print('Tıklandı!');
-  },
-  onDoubleTap: () {
-    print('Çift tıklandı!');
-  },
-  child: Container(
-    color: Colors.blue,
-    child: Text('Bana tıkla'),
-  ),
-)
-```
+- Görev ekleme/silme/düzenleme
+- Görev listesi görünümü
+- Görev detay sayfası
+- Form validasyonu
+- Sürükle-bırak sıralama
+- Kategori filtreleme
 
-### TextField
-Metin girişi alır:
+Örnek uygulamanın detaylı anlatımı için [tıklayınız](./ornek_uygulama/README.md).
 
-```dart
-TextField(
-  decoration: InputDecoration(
-    labelText: 'Adınız',
-    hintText: 'Adınızı girin',
-    border: OutlineInputBorder(),
-  ),
-  onChanged: (deger) {
-    print('Yeni değer: $deger');
-  },
-)
-```
+## 🚀 Ana Proje: Alışkanlık Takip Uygulaması
 
-## State Yönetimi
+Bu hafta ana projemizde şunları yapacağız:
 
-### setState
-Widget'ın durumunu günceller:
+1. Alışkanlık listesi görünümü
+2. Yeni alışkanlık ekleme formu
+3. Alışkanlık detay sayfası
+4. Kategori filtreleme sistemi
 
-```dart
-class SayacWidget extends StatefulWidget {
-  @override
-  _SayacWidgetState createState() => _SayacWidgetState();
-}
+Ana proje detayları için [tıklayınız](./ana_proje/README.md).
 
-class _SayacWidgetState extends State<SayacWidget> {
-  int _sayac = 0;
+## 🎯 Alıştırmalar
 
-  void _artir() {
-    setState(() {
-      _sayac++;
-    });
-  }
+1. Liste İşlemleri:
+   - [ ] GridView ile kart tasarımı yapın
+   - [ ] Sürükle-bırak sıralama ekleyin
+   - [ ] Pull-to-refresh ekleyin
+   - [ ] Sonsuz scroll yapın
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text('Sayaç: $_sayac'),
-        ElevatedButton(
-          onPressed: _artir,
-          child: Text('Artır'),
-        ),
-      ],
-    );
-  }
-}
-```
+2. Form Geliştirmeleri:
+   - [ ] Karmaşık form validasyonu
+   - [ ] Custom form field
+   - [ ] Otomatik form doldurma
+   - [ ] Form durumu yönetimi
 
-## 📝 Alıştırmalar
+## 🔍 Hata Ayıklama İpuçları
 
-### 1. Layout Alıştırması
-- Row ve Column kullanarak bir kart tasarlayın
-- İçinde resim, başlık ve açıklama olsun
-- Padding ve margin kullanın
+- ListView performans optimizasyonu
+- Form validasyon hataları
+- Dialog ve bottom sheet yaşam döngüsü
+- Gesture çakışmaları
 
-### 2. Gesture Alıştırması
-- Bir GestureDetector ile farklı dokunma olaylarını yakalayın
-- Her olay için farklı bir geri bildirim verin
-- SnackBar kullanarak bildirim gösterin
+## 📚 Faydalı Kaynaklar
 
-### 3. State Alıştırması
-- Bir alışkanlık sayacı oluşturun
-- Artır/Azalt butonları ekleyin
-- Sıfırlama özelliği ekleyin
-
-## 📚 Kaynaklar
-- [Flutter Widget Kataloğu](https://flutter.dev/docs/development/ui/widgets)
-- [Layout Tutorial](https://flutter.dev/docs/development/ui/layout/tutorial)
+- [Flutter ListView Cookbook](https://flutter.dev/docs/cookbook/lists)
+- [Form Validation Cookbook](https://flutter.dev/docs/cookbook/forms)
 - [Gestures in Flutter](https://flutter.dev/docs/development/ui/advanced/gestures)
-- [State Management](https://flutter.dev/docs/development/data-and-backend/state-mgmt/intro)
 
-## 🎯 Ödev
-1. Bir TODO listesi uygulaması geliştirin
-2. Görevleri ekleyip silebilme özelliği olsun
-3. Görevleri tamamlandı olarak işaretleyebilme özelliği olsun
-4. Tamamlanan ve tamamlanmayan görevleri farklı renklerde gösterin 
+## ✅ Haftalık Görevler
+
+1. Örnek TODO List uygulamasını tamamlayın
+2. Ana projedeki liste görünümlerini oluşturun
+3. Alıştırmaları çözün
+4. Öğrendiklerinizi blog yazısına dönüştürün
+
+## 💪 Sonraki Hafta
+
+Gelecek hafta şunları öğreneceğiz:
+- Navigasyon ve routing
+- Sayfa geçiş animasyonları
+- Veri aktarımı
+- Durum yönetimi 
