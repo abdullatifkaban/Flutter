@@ -1,132 +1,139 @@
-# Hafta 5 - Alışkanlık Takip Uygulaması: Hedefler ve Başarılar
+# Hafta 5 - Alışkanlık Takip Uygulaması: PostgreSQL Entegrasyonu
 
-Bu hafta, uygulamamıza hedef belirleme sistemi, başarı rozetleri ve sosyal paylaşım özelliklerini ekleyeceğiz.
+Bu hafta, uygulamamıza PostgreSQL veritabanı entegrasyonunu ekleyeceğiz.
 
 ## 📱 Bu Haftanın Yenilikleri
 
-- Hedef belirleme sistemi
-- Başarı rozetleri
-- Sosyal paylaşım
-- Yedekleme sistemi
-- Firebase entegrasyonu
+- PostgreSQL veritabanı tasarımı
+- Veritabanı bağlantısı
+- CRUD işlemleri
+- Veri modelleri
+- Veritabanı güvenliği
 
 ## 🚀 Kurulum Adımları
 
 1. Gerekli paketleri `pubspec.yaml` dosyasına ekleyin:
 ```yaml
 dependencies:
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
-  cloud_firestore: ^4.13.6
-  share_plus: ^7.2.1
-  path_provider: ^2.1.1
+  postgres: ^2.6.3
+  dotenv: ^4.2.0
+  crypto: ^3.0.3
 ```
 
-2. Firebase projesini oluşturun ve yapılandırın:
-   - Firebase Console'dan yeni proje oluşturun
-   - Flutter uygulamanızı Firebase'e ekleyin
-   - google-services.json dosyasını indirin
-   - Gerekli yapılandırmaları yapın
-
-3. `lib` klasörü altında aşağıdaki dosyaları oluşturun:
-   - `models/hedef.dart`: Hedef veri modeli
-   - `models/rozet.dart`: Rozet veri modeli
-   - `services/firebase_servisi.dart`: Firebase işlemleri
-   - `screens/hedef_sayfasi.dart`: Hedef yönetimi
-   - `screens/basari_sayfasi.dart`: Rozetler ve başarılar
+2. `lib` klasörü altında aşağıdaki dosyaları oluşturun:
+   - `database/postgres_connection.dart`
+   - `models/habit.dart`
+   - `repositories/habit_repository.dart`
+   - `services/database_service.dart`
+   - `utils/database_helper.dart`
 
 ## 🔍 Kod İncelemesi
 
-### 1. Hedef Modeli
+### 1. Veritabanı Bağlantısı
 ```dart
-class Hedef {
-  String id;
-  String baslik;
-  int hedefSayisi;
-  int tamamlanan;
-  DateTime baslangicTarihi;
-  DateTime? bitisTarihi;
-  List<String> altHedefler;
-  bool tamamlandi;
+class PostgresConnection {
+  static final PostgresConnection _instance = PostgresConnection._internal();
+  Connection? _connection;
 
-  Hedef({
-    required this.id,
-    required this.baslik,
-    required this.hedefSayisi,
-    this.tamamlanan = 0,
-    required this.baslangicTarihi,
-    this.bitisTarihi,
-    this.altHedefler = const [],
-    this.tamamlandi = false,
+  factory PostgresConnection() {
+    return _instance;
+  }
+
+  PostgresConnection._internal();
+
+  Future<Connection> get connection async {
+    if (_connection != null) return _connection!;
+    
+    _connection = await connect(
+      host: ENV['DB_HOST'],
+      port: int.parse(ENV['DB_PORT']),
+      database: ENV['DB_NAME'],
+      username: ENV['DB_USER'],
+      password: ENV['DB_PASSWORD'],
+    );
+    
+    return _connection!;
+  }
+}
+```
+
+### 2. Veri Modeli
+```dart
+class Habit {
+  final int? id;
+  final String title;
+  final String description;
+  final int frequency;
+  final DateTime createdAt;
+  final DateTime? completedAt;
+
+  Habit({
+    this.id,
+    required this.title,
+    required this.description,
+    required this.frequency,
+    required this.createdAt,
+    this.completedAt,
   });
 
-  double get ilerleme => tamamlanan / hedefSayisi;
-  bool get suresiDoldu => bitisTarihi?.isBefore(DateTime.now()) ?? false;
-}
-```
-
-### 2. Rozet Sistemi
-```dart
-class RozetYoneticisi {
-  static const List<Rozet> tumRozetler = [
-    Rozet(
-      id: 'ilk_aliskanlik',
-      ad: 'İlk Adım',
-      aciklama: 'İlk alışkanlığını oluştur',
-      ikon: 'assets/rozetler/ilk_adim.png',
-    ),
-    // Diğer rozetler...
-  ];
-
-  static List<Rozet> kazanilanRozetleriHesapla(KullaniciVerileri veriler) {
-    return tumRozetler.where((rozet) => rozet.kosulKontrol(veriler)).toList();
-  }
-}
-```
-
-### 3. Firebase Servisi
-```dart
-class FirebaseServisi {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String kullaniciId;
-
-  Future<void> hedefEkle(Hedef hedef) async {
-    await _firestore
-        .collection('kullanicilar')
-        .doc(kullaniciId)
-        .collection('hedefler')
-        .add(hedef.toMap());
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'frequency': frequency,
+      'created_at': createdAt.toIso8601String(),
+      'completed_at': completedAt?.toIso8601String(),
+    };
   }
 
-  Future<void> rozetKaydet(String rozetId) async {
-    await _firestore
-        .collection('kullanicilar')
-        .doc(kullaniciId)
-        .collection('rozetler')
-        .doc(rozetId)
-        .set({
-      'kazanilmaTarihi': DateTime.now(),
-    });
-  }
-}
-```
-
-### 4. Sosyal Paylaşım
-```dart
-class BasariPaylasim {
-  static Future<void> rozetPaylas(Rozet rozet) async {
-    final resimYolu = await _rozetResmiKaydet(rozet);
-    await Share.shareFiles(
-      [resimYolu],
-      text: 'Yeni bir rozet kazandım: ${rozet.ad}! 🎉',
+  factory Habit.fromMap(Map<String, dynamic> map) {
+    return Habit(
+      id: map['id'],
+      title: map['title'],
+      description: map['description'],
+      frequency: map['frequency'],
+      createdAt: DateTime.parse(map['created_at']),
+      completedAt: map['completed_at'] != null 
+        ? DateTime.parse(map['completed_at']) 
+        : null,
     );
   }
+}
+```
 
-  static Future<void> hedefPaylas(Hedef hedef) async {
-    await Share.share(
-      'Yeni hedefime ulaştım: ${hedef.baslik} ✅\n'
-      'İlerleme: %${(hedef.ilerleme * 100).toInt()}',
+### 3. Repository Sınıfı
+```dart
+class HabitRepository {
+  final PostgresConnection _db = PostgresConnection();
+
+  Future<List<Habit>> getAllHabits() async {
+    final conn = await _db.connection;
+    final results = await conn.query('SELECT * FROM habits');
+    
+    return results.map((row) => Habit.fromMap(row.toColumnMap())).toList();
+  }
+
+  Future<Habit> createHabit(Habit habit) async {
+    final conn = await _db.connection;
+    final result = await conn.query(
+      'INSERT INTO habits (title, description, frequency, created_at) '
+      'VALUES (@title, @description, @frequency, @created_at) '
+      'RETURNING *',
+      substitutionValues: habit.toMap(),
     );
+    
+    return Habit.fromMap(result.first.toColumnMap());
+  }
+
+  Future<bool> deleteHabit(int id) async {
+    final conn = await _db.connection;
+    final result = await conn.execute(
+      'DELETE FROM habits WHERE id = @id',
+      substitutionValues: {'id': id},
+    );
+    
+    return result == 1;
   }
 }
 ```
@@ -134,40 +141,43 @@ class BasariPaylasim {
 ## 🎯 Öğrenme Hedefleri
 
 Bu hafta:
-- Firebase kullanımını
-- Veri yedekleme ve senkronizasyonu
-- Sosyal paylaşım entegrasyonunu
-- Başarı sistemi tasarımını
+- PostgreSQL veritabanı tasarımını
+- Veritabanı bağlantı yönetimini
+- CRUD operasyonlarını
+- Veri modellemesini
 öğrenmiş olacaksınız.
 
 ## 📝 Özelleştirme Önerileri
 
-1. Hedefler:
-   - Alt hedefler ekleyin
-   - Hedef kategorileri oluşturun
-   - İlerleme grafikleri ekleyin
+1. Veritabanı:
+   - İndeksler ekleyin
+   - Yedekleme stratejisi oluşturun
+   - Performans optimizasyonu yapın
+   - Bağlantı havuzu ekleyin
 
-2. Rozetler:
-   - Animasyonlu rozetler ekleyin
-   - Özel rozet tasarımları yapın
-   - Rozet seviyeleri ekleyin
+2. Güvenlik:
+   - SSL bağlantısı ekleyin
+   - Şifreleme uygulayın
+   - Kullanıcı yetkilendirmesi ekleyin
+   - SQL injection önlemleri alın
 
-3. Sosyal Özellikler:
-   - Arkadaş sistemi ekleyin
-   - Başarı sıralaması yapın
-   - Grup hedefleri oluşturun
+3. Veri Modelleri:
+   - İlişkisel tablolar ekleyin
+   - Veri doğrulama ekleyin
+   - Veri dönüşümleri ekleyin
+   - Özel sorgular yazın
 
 ## 💡 Sonraki Hafta
 
 Gelecek hafta ekleyeceğimiz özellikler:
-- Çevrimdışı çalışma modu
-- Veri senkronizasyonu
-- Performans iyileştirmeleri
-- Hata ayıklama sistemi
+- İlişkisel tablolar
+- Kompleks sorgular
+- Veritabanı optimizasyonu
+- Yedekleme sistemi
 
 ## 🔍 Önemli Notlar
 
-- Firebase kurallarını düzgün yapılandırın
-- Veri güvenliğine dikkat edin
-- Kullanıcı gizliliğini koruyun
-- Performansı optimize edin 
+- Veritabanı bağlantı bilgilerini güvenli tutun
+- Hata yönetimini düzgün yapın
+- Veritabanı şemasını versiyonlayın
+- Performans metriklerini takip edin 

@@ -10,7 +10,7 @@ Her hafta yeni özellikler ekleyerek geliştireceğimiz ana projemiz, kullanıc�
 - Alışkanlık oluşturma ve düzenleme
 - Günlük, haftalık ve aylık hedefler
 - İstatistikler ve raporlama
-- Çoklu veritabanı desteği (SQLite, PostgreSQL, MongoDB)
+- PostgreSQL ve MongoDB veritabanı desteği
 - REST API entegrasyonu
 - Bildirim sistemi
 - Container tabanlı deployment
@@ -35,15 +35,11 @@ Her hafta yeni özellikler ekleyerek geliştireceğimiz ana projemiz, kullanıc�
   - Örnek: Kayıt formu uygulaması
 
 ### Veritabanı ve Backend (Hafta 5-9)
-- **[Hafta 5: Yerel Veritabanı (SQLite)](docs/hafta5/)**
-  - Ana Proje: Yerel veri depolama
-  - Örnek: Not defteri uygulaması
-  
-- **[Hafta 6-7: PostgreSQL Entegrasyonu](docs/hafta6-7/)**
-  - Ana Proje: Uzak veritabanı bağlantısı
+- **[Hafta 5-6: PostgreSQL Entegrasyonu](docs/hafta5-6/)**
+  - Ana Proje: Veritabanı tasarımı ve bağlantısı
   - Örnek: Çevrimiçi blog uygulaması
   
-- **[Hafta 8-9: MongoDB Entegrasyonu](docs/hafta8-9/)**
+- **[Hafta 7-9: MongoDB Entegrasyonu](docs/hafta7-9/)**
   - Ana Proje: NoSQL veritabanı entegrasyonu
   - Örnek: Sosyal medya feed uygulaması
 
@@ -99,7 +95,7 @@ git clone https://github.com/kullanici/flutter-habit-tracker.git
   
 - Vize Projesi (%30)
   - 7. hafta sonunda ana projenin ilk aşaması
-  - Yerel veritabanı ve temel özelliklerin tamamlanması
+  - Veritabanı ve temel özelliklerin tamamlanması
   
 - Final Projesi (%40)
   - Ana projenin tamamlanması
