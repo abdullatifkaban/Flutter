@@ -5,49 +5,126 @@
 ### Temel Bilgi ve Beceriler
 - **Programlama Temelleri**
   - Algoritma ve mantıksal düşünme
+    * Veri tipleri ve değişkenler
+    * Kontrol yapıları (if, loop)
+    * Fonksiyonlar ve modüller
+    * Hata yönetimi (try-catch)
   - Veri yapıları
+    * Diziler ve listeler
+    * Hash tablolar
+    * Ağaç yapıları
+    * Yığın ve kuyruk
   - Nesne yönelimli programlama (OOP)
+    * Sınıflar ve nesneler
+    * Kalıtım ve polimorfizm
+    * Kapsülleme ve soyutlama
+    * Interface ve abstract sınıflar
   - Versiyon kontrol sistemleri (Git)
+    * Temel Git komutları
+    * Branch yönetimi
+    * Merge ve rebase
+    * Conflict çözümleri
   - Terminal/Komut satırı kullanımı
+    * Temel terminal komutları
+    * Shell scripting
+    * Paket yönetimi
+    * Dosya sistemi işlemleri
 
 - **Yazılım Mimarisi**
   - Tasarım desenleri (Design Patterns)
+    * Creational Patterns
+    * Structural Patterns
+    * Behavioral Patterns
   - SOLID prensipleri
+    * Single Responsibility
+    * Open/Closed
+    * Liskov Substitution
+    * Interface Segregation
+    * Dependency Inversion
   - Clean Code yaklaşımı
+    * Kod okunabilirliği
+    * Fonksiyon ve sınıf tasarımı
+    * Yorum yazma kuralları
+    * Kod tekrarını önleme
   - Yazılım yaşam döngüsü
+    * Gereksinim analizi
+    * Tasarım
+    * Geliştirme
+    * Test
+    * Deployment
+    * Bakım
 
 - **Veritabanı Bilgisi**
   - İlişkisel veritabanları (SQL)
+    * Tablo tasarımı
+    * İlişki tipleri
+    * Normalizasyon
+    * Kompleks sorgular
   - NoSQL veritabanları
+    * Document-based (MongoDB)
+    * Key-value (Redis)
+    * Column-family (Cassandra)
+    * Graph databases (Neo4j)
   - Temel sorgu yazma
+    * CRUD işlemleri
+    * Joins
+    * Aggregation
+    * Indexing
   - Veritabanı tasarımı
+    * Schema tasarımı
+    * Performance optimizasyonu
+    * Backup stratejileri
+    * Scaling çözümleri
 
 ### Modern Bir Uygulamanın Anatomisi
 
 ```mermaid
-graph TD
-    A[Modern Uygulama] --> B[Frontend/UI]
-    A --> C[Backend]
-    A --> D[Veritabanı]
-    A --> E[Altyapı/DevOps]
-
-    B --> B1[UI Tasarımı]
-    B --> B2[State Yönetimi]
-    B --> B3[API Entegrasyonu]
-    B --> B4[Responsive Tasarım]
-
-    C --> C1[API/Servisler]
-    C --> C2[İş Mantığı]
-    C --> C3[Güvenlik]
-    C --> C4[Cache Yönetimi]
-
-    D --> D1[Veri Modelleme]
-    D --> D2[Veri Güvenliği]
-    D --> D3[Yedekleme]
-
-    E --> E1[CI/CD]
-    E --> E2[Monitoring]
-    E --> E3[Ölçeklendirme]
+graph LR
+    A[Modern Uygulama]
+    subgraph Frontend
+        B[UI Katmanı]
+        B1[Kullanıcı Arayüzü]
+        B2[State Yönetimi]
+        B3[API İletişimi]
+        B4[Responsive Design]
+        B --> B1
+        B --> B2
+        B --> B3
+        B --> B4
+    end
+    subgraph Backend
+        C[Sunucu Katmanı]
+        C1[REST API]
+        C2[İş Mantığı]
+        C3[Güvenlik]
+        C4[Cache]
+        C --> C1
+        C --> C2
+        C --> C3
+        C --> C4
+    end
+    subgraph Database
+        D[Veri Katmanı]
+        D1[Veri Modelleri]
+        D2[Veri Güvenliği]
+        D3[Backup]
+        D --> D1
+        D --> D2
+        D --> D3
+    end
+    subgraph DevOps
+        E[Altyapı]
+        E1[CI/CD]
+        E2[Monitoring]
+        E3[Scaling]
+        E --> E1
+        E --> E2
+        E --> E3
+    end
+    A --> Frontend
+    A --> Backend
+    A --> Database
+    A --> DevOps
 ```
 
 ### Frontend Geliştirici için Gereksinimler
