@@ -107,7 +107,7 @@ if __name__ == '__main__':
 Bu aşamadan sonra web servisi çalıştırarak Flutter uygulamamızı geliştirmeye başlayabiliriz.
 
 ```sh
-python server.py
+python service.py
 ```
 
 # Sonuç
