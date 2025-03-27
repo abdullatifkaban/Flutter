@@ -234,6 +234,67 @@ class ApiService {
   - Görev ID'si URL'ye eklenerek hangi görevin silineceği belirtilir.
 ---
 
+## 5. Görev Tamamlandı
+
+Listedeki görevlerin tamamlandığında işaretlenmesi ve veri tabanının güncellenmesi için bir `checkbox` nesnesi ekleyelim.
+
+Bunun için önce `api_service.dart` dosyasına güncelleme fonksiyonu ekleyelim.
+
+```dart
+class ApiService {
+    
+    // ↓ Diğer fonksiyonların altına aşağıdaki satırları ekleyin
+  static Future<void> updateTaskStatus(int id, bool completed) async {
+    await http.patch(
+      Uri.parse('$baseUrl/tasks/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'completed': completed}), // Ensure key matches backend
+    );
+  }
+  // ----------
+}
+```
+
+Şimdi de `home_screen.dart` dosyasında `ListTile` widget'ına `leading` özelliğini eklemek için aşağıdaki değişiklikleri yapalım:
+
+```dart
+        return ListTile(
+            // ↓ Görev listesine checkbox ekleyelim
+            leading: Checkbox(
+              value: task['is_completed'] ?? false, 
+              onChanged: (bool? value) {
+                ApiService.updateTaskStatus(task['id'], value ?? false);
+                fetchTasks();
+              },
+            ),
+            // -----------------------
+            title: Text(task['title']),
+            subtitle: Text(task['description'] ?? ''),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                ApiService.deleteTask(task['id']);
+                fetchTasks();
+              },
+            ),
+          );
+
+```
+
+Son olarak web servisin güncelleme özelliğini ayarlayalım. Bunun için [Web Servisi Oluşturma](04-Database/01-Web-Service.md) dersimizdeki `service.py` dosyasına aşağıdaki fonksiyonu ekleyelim:
+
+```py
+@app.route('/tasks/<int:task_id>', methods=['PATCH'])
+def update_task_status(task_id):
+    data = request.json
+    cursor.execute(
+        "UPDATE tasks SET is_completed = %s WHERE id = %s",
+        (data.get('completed'), task_id) 
+    )
+    conn.commit()
+    return jsonify({"message": "Task status updated"})
+```
+
 # Sonuç
 
 Bu rehberde, Flutter kullanarak bir To-Do uygulamasının temel arayüz tasarımını ve CRUD işlemlerini nasıl gerçekleştirebileceğinizi öğrendiniz. Flutter'ın güçlü widget yapısı ve HTTP kütüphanesi sayesinde, kullanıcı dostu bir uygulama geliştirmek oldukça kolaydır. Ayrıca, API servis katmanı ile uygulamanızın backend ile iletişimini sağlam bir şekilde yapılandırabilirsiniz. Bundan sonraki adımlarda, uygulamanıza kullanıcı kimlik doğrulama, görevlerin tamamlanma durumu gibi ek özellikler ekleyerek daha işlevsel hale getirebilirsiniz. Başarılar! 🚀

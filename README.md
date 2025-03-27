@@ -20,6 +20,10 @@ Bu repo, Flutter ile adım adım proje geliştirmeyi öğreten bir eğitim seris
 * [Navigasyon Örnekleri](03-Navigation-Routing/02-Navigation-Examples.md)
 * [Navigasyon Projesi](03-Navigation-Routing/03-Navigation-Project.md)
 
+###   Veri Tabanı İşlemleri
+* [PostgreSQL ve Web Servis](04-Database/01-Web-Service.md)
+* [Flutter Veri Tabanı İşlemleri](04-Database/02-Flutter-CRUD.md)
+
 ## 🔧 Gereksinimler
 - [Flutter SDK (son sürüm)](https://docs.flutter.dev/get-started/install)
 - [VS Code](https://code.visualstudio.com/download) veya [Android Studio](https://developer.android.com/studio)

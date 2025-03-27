@@ -56,7 +56,7 @@ Gerekli paketleri yükleyin:
 pip install flask psycopg2 flask-cors
 ```
 
-Şimdi bir `server.py` dosyası oluşturup içine aşağıdaki kodları ekleyelim:
+Şimdi bir `service.py` dosyası oluşturup içine aşağıdaki kodları ekleyelim:
 
 ```python
 from flask import Flask, jsonify, request
