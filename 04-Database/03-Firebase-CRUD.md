@@ -72,9 +72,10 @@ Firebase'i Flutter projenize eklemenin en kolay yolu FlutterFire CLI kullanmakt�
 >     ```
 > Bu adımlardan sonra `flutterfire configure` komutu çalışmalıdır. Diğer kabuklar (bash vb.) için benzer adımlar `.bashrc` veya ilgili profil dosyası üzerinde yapılır.
 
-    *   Komut sizden oluşturduğunuz Firebase projesini seçmenizi isteyecektir.
-    *   Hangi platformları (android, ios, web vb.) yapılandırmak istediğinizi soracaktır. İhtiyacınız olanları seçin (genellikle android ve ios).
-    *   Bu komut, gerekli platform özgü yapılandırma dosyalarını (`google-services.json` vb.) otomatik olarak oluşturacak ve `lib/firebase_options.dart` dosyasını projenize ekleyecektir.
+> [!NOTE]
+> *   Komut sizden oluşturduğunuz Firebase projesini seçmenizi isteyecektir.
+>  *   Hangi platformları (android, ios, web vb.) yapılandırmak istediğinizi soracaktır. İhtiyacınız olanları seçin (genellikle android ve ios).
+>  *   Bu komut, gerekli platform özgü yapılandırma dosyalarını (`google-services.json` vb.) otomatik olarak oluşturacak ve `lib/firebase_options.dart` dosyasını projenize ekleyecektir.
 
 **Adım 4: Gerekli Firebase Paketlerini Ekleme**
 Projenizin `pubspec.yaml` dosyasına aşağıdaki Firebase paketlerini ekleyin ve kaydedin (FlutterFire CLI bunları otomatik eklemediyse veya eksikse):
@@ -95,9 +96,10 @@ dependencies:
   # provider: ^latest 
 ```
 
-Paketleri yüklemek için terminalde şu komutu çalıştırın:
+Paketleri `pubspec.yaml` dosyasına otomatik ekleyerek yüklemek için terminalde sırasıyla şu komutları çalıştırın:
 ```sh
-flutter pub get
+flutter pub add firebase_core
+flutter pub add cloud_firestore
 ```
 
 ---
